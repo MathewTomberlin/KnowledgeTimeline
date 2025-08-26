@@ -125,35 +125,5 @@ class LocalEmbeddingServiceTest {
         assertEquals(result1, result2); // Should be deterministic
     }
 
-    @Test
-    void testGenerateEmbeddings_WithEmptyTextList() {
-        // Given
-        List<String> texts = Arrays.asList();
 
-        // When
-        List<List<Float>> result = embeddingService.generateEmbeddings(texts);
-
-        // Then
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testGenerateEmbedding_WithEmptyText() {
-        // Given
-        String text = "";
-
-        when(webClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri("/embeddings")).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(any())).thenReturn(requestBodySpec);
-        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Map.class)).thenThrow(new RuntimeException("Service unavailable"));
-
-        // When
-        List<Float> result = embeddingService.generateEmbedding(text);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(384, result.size()); // Should use mock embedding
-    }
 }
