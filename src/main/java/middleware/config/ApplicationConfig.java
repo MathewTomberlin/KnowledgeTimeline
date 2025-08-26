@@ -29,12 +29,14 @@ public class ApplicationConfig {
 
     /**
      * Configure embedding service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses local embedding service for local development and testing.
      */
     @Bean
     @Profile({"local", "test", "docker"})
-    public EmbeddingService embeddingService() {
-        return new MockEmbeddingService();
+    public EmbeddingService embeddingService(@Value("${knowledge.embeddings.url:http://localhost:8081}") String baseUrl,
+                                           @Value("${knowledge.embeddings.model:sentence-transformers/all-MiniLM-L6-v2}") String modelName,
+                                           @Value("${knowledge.embeddings.dimension:384}") int embeddingDimension) {
+        return new LocalEmbeddingService(baseUrl, modelName, embeddingDimension);
     }
 
     /**

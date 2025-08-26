@@ -3,6 +3,7 @@ package middleware.api;
 import middleware.service.MemoryExtractionService;
 import middleware.service.DialogueStateService;
 import middleware.service.impl.RelationshipDiscoveryService;
+import middleware.service.impl.SessionSummarizationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +20,16 @@ public class JobController {
     private final MemoryExtractionService memoryExtractionService;
     private final DialogueStateService dialogueStateService;
     private final RelationshipDiscoveryService relationshipDiscoveryService;
+    private final SessionSummarizationService sessionSummarizationService;
 
     public JobController(MemoryExtractionService memoryExtractionService,
                         DialogueStateService dialogueStateService,
-                        RelationshipDiscoveryService relationshipDiscoveryService) {
+                        RelationshipDiscoveryService relationshipDiscoveryService,
+                        SessionSummarizationService sessionSummarizationService) {
         this.memoryExtractionService = memoryExtractionService;
         this.dialogueStateService = dialogueStateService;
         this.relationshipDiscoveryService = relationshipDiscoveryService;
+        this.sessionSummarizationService = sessionSummarizationService;
     }
 
     /**
@@ -91,24 +95,27 @@ public class JobController {
                     .body(Map.of("error", "session_id and tenant_id are required"));
             }
             
-            // TODO: Implement session summarization logic
-            // This would typically:
-            // 1. Get dialogue state for the session
-            // 2. Generate summary using LLM
-            // 3. Create session memory object
-            // 4. Update dialogue state
+            // Use the real session summarization service
+            Map<String, Object> result = sessionSummarizationService.summarizeSession(sessionId, tenantId);
+            
+            if (result.containsKey("error")) {
+                return ResponseEntity.badRequest().body(result);
+            }
             
             Map<String, Object> response = Map.of(
                 "status", "completed",
                 "job_id", "sum_" + System.currentTimeMillis(),
                 "session_id", sessionId,
+                "summary", result.get("summary"),
+                "memory_object_id", result.get("memory_object_id"),
+                "tokens_used", result.get("tokens_used"),
                 "message", "Session summarization completed"
             );
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Failed to summarize session"));
+                .body(Map.of("error", "Failed to summarize session: " + e.getMessage()));
         }
     }
 
