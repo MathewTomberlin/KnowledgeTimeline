@@ -1,0 +1,3 @@
+-- V2__indexes.sql
+-- This migration is empty because all indexes were already created in V1__core.sql
+-- This file exists to satisfy Flyway's migration history
