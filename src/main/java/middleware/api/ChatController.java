@@ -243,7 +243,13 @@ public class ChatController {
      */
     private void trackUsage(String tenantId, String sessionId, String model, int inputTokens, int outputTokens) {
         try {
-            usageTrackingService.trackChatCompletion(tenantId, sessionId, model, inputTokens, outputTokens);
+            String userId = "default-user"; // TODO: Extract from security context
+            String requestId = "req-" + System.currentTimeMillis();
+            int knowledgeTokens = 0; // TODO: Calculate from context building
+            double costEstimate = 0.0; // TODO: Calculate based on model and tokens
+            
+            usageTrackingService.trackChatCompletion(tenantId, userId, sessionId, requestId, 
+                model, inputTokens, outputTokens, knowledgeTokens, costEstimate);
         } catch (Exception e) {
             logger.warn("Failed to track usage for tenant: {}, session: {}", tenantId, sessionId, e);
         }

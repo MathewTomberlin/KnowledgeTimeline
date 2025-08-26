@@ -29,7 +29,7 @@ public class ApplicationConfig {
 
     /**
      * Configure embedding service implementation.
-     * Uses local embedding service for local development and testing.
+     * Uses local embeddings service for development.
      */
     @Bean
     @Profile({"local", "test", "docker"})
@@ -41,7 +41,7 @@ public class ApplicationConfig {
 
     /**
      * Configure vector store service implementation.
-     * Uses PostgreSQL pgvector adapter for local development and testing.
+     * Uses PostgreSQL with pgvector for local development.
      */
     @Bean
     @Profile({"local", "test", "docker"})
@@ -51,62 +51,23 @@ public class ApplicationConfig {
     }
 
     /**
-     * Configure context builder service implementation.
-     * Uses real implementation for context building with MMR algorithm.
-     */
-    @Bean
-    @Profile({"local", "test", "docker"})
-    public ContextBuilderService contextBuilderService() {
-        return new RealContextBuilderService();
-    }
-
-    /**
-     * Configure token counting service implementation.
-     * Uses real implementation for accurate token counting.
-     */
-    @Bean
-    @Profile({"local", "test", "docker"})
-    public TokenCountingService tokenCountingService() {
-        return new RealTokenCountingService();
-    }
-
-    /**
-     * Configure usage tracking service implementation.
-     * Uses real implementation for usage and cost tracking.
-     */
-    @Bean
-    @Profile({"local", "test", "docker"})
-    public UsageTrackingService usageTrackingService() {
-        return new RealUsageTrackingService();
-    }
-
-    /**
-     * Configure dialogue state service implementation.
-     * Uses real implementation for session management.
-     */
-    @Bean
-    @Profile({"local", "test", "docker"})
-    public DialogueStateService dialogueStateService() {
-        return new RealDialogueStateService();
-    }
-
-    /**
-     * Configure memory extraction service implementation.
-     * Uses real implementation for structured extraction.
-     */
-    @Bean
-    @Profile({"local", "test", "docker"})
-    public MemoryExtractionService memoryExtractionService() {
-        return new RealMemoryExtractionService();
-    }
-
-    /**
      * Configure blob storage service implementation.
-     * Uses real implementation for file storage.
+     * Uses local disk storage for development.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public BlobStorageService blobStorageService() {
-        return new RealBlobStorageService();
+        return new LocalDiskBlobStorage();
+    }
+
+    /**
+     * Configure data source for database connections.
+     * Profile-specific configuration handled in application-*.yml files.
+     */
+    @Bean
+    public DataSource dataSource() {
+        // Data source configuration is handled by Spring Boot's auto-configuration
+        // based on application-*.yml profiles
+        return null; // Spring Boot will create the appropriate DataSource
     }
 }
