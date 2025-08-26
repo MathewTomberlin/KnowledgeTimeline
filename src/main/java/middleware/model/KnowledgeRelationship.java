@@ -13,10 +13,10 @@ public class KnowledgeRelationship {
     private UUID id;
     
     @Column(name = "source_id", nullable = false)
-    private UUID sourceId;
+    private String sourceId;
     
     @Column(name = "target_id", nullable = false)
-    private UUID targetId;
+    private String targetId;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -42,7 +42,7 @@ public class KnowledgeRelationship {
     // Constructors
     public KnowledgeRelationship() {}
     
-    public KnowledgeRelationship(UUID sourceId, UUID targetId, RelationshipType type) {
+    public KnowledgeRelationship(String sourceId, String targetId, RelationshipType type) {
         this.sourceId = sourceId;
         this.targetId = targetId;
         this.type = type;
@@ -57,19 +57,19 @@ public class KnowledgeRelationship {
         this.id = id;
     }
     
-    public UUID getSourceId() {
+    public String getSourceId() {
         return sourceId;
     }
     
-    public void setSourceId(UUID sourceId) {
+    public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
     
-    public UUID getTargetId() {
+    public String getTargetId() {
         return targetId;
     }
     
-    public void setTargetId(UUID targetId) {
+    public void setTargetId(String targetId) {
         this.targetId = targetId;
     }
     

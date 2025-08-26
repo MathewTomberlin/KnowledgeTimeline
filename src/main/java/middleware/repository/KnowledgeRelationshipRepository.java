@@ -10,14 +10,14 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
 
 /**
  * Repository interface for KnowledgeRelationship entity operations.
  * Provides data access methods for relationship management.
  */
 @Repository
-public interface KnowledgeRelationshipRepository extends JpaRepository<KnowledgeRelationship, UUID> {
+public interface KnowledgeRelationshipRepository extends JpaRepository<KnowledgeRelationship, String> {
 
     /**
      * Find relationships by source object ID.
@@ -25,7 +25,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param sourceId The source knowledge object ID
      * @return List of relationships
      */
-    List<KnowledgeRelationship> findBySourceId(UUID sourceId);
+    List<KnowledgeRelationship> findBySourceId(String sourceId);
 
     /**
      * Find relationships by target object ID.
@@ -33,7 +33,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param targetId The target knowledge object ID
      * @return List of relationships
      */
-    List<KnowledgeRelationship> findByTargetId(UUID targetId);
+    List<KnowledgeRelationship> findByTargetId(String targetId);
 
     /**
      * Find relationships by type.
@@ -50,7 +50,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param type The relationship type
      * @return List of relationships
      */
-    List<KnowledgeRelationship> findBySourceIdAndType(UUID sourceId, RelationshipType type);
+    List<KnowledgeRelationship> findBySourceIdAndType(String sourceId, RelationshipType type);
 
     /**
      * Find relationships by target and type.
@@ -59,7 +59,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param type The relationship type
      * @return List of relationships
      */
-    List<KnowledgeRelationship> findByTargetIdAndType(UUID targetId, RelationshipType type);
+    List<KnowledgeRelationship> findByTargetIdAndType(String targetId, RelationshipType type);
 
     /**
      * Find relationships between two specific objects.
@@ -68,7 +68,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param targetId The target knowledge object ID
      * @return List of relationships
      */
-    List<KnowledgeRelationship> findBySourceIdAndTargetId(UUID sourceId, UUID targetId);
+    List<KnowledgeRelationship> findBySourceIdAndTargetId(String sourceId, String targetId);
 
     /**
      * Find relationships by confidence threshold.
@@ -126,7 +126,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param sourceId The source knowledge object ID
      * @return Count of relationships
      */
-    long countBySourceId(UUID sourceId);
+    long countBySourceId(String sourceId);
 
     /**
      * Count relationships by target object.
@@ -134,7 +134,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @param targetId The target knowledge object ID
      * @return Count of relationships
      */
-    long countByTargetId(UUID targetId);
+    long countByTargetId(String targetId);
 
     /**
      * Find relationships with highest confidence for a source object.
@@ -143,7 +143,7 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @return Optional containing the relationship with highest confidence
      */
     @Query("SELECT kr FROM KnowledgeRelationship kr WHERE kr.sourceId = :sourceId ORDER BY kr.confidence DESC")
-    Optional<KnowledgeRelationship> findTopBySourceIdOrderByConfidenceDesc(@Param("sourceId") UUID sourceId);
+    Optional<KnowledgeRelationship> findTopBySourceIdOrderByConfidenceDesc(@Param("sourceId") String sourceId);
 
     /**
      * Find relationships with highest confidence for a target object.
@@ -152,5 +152,5 @@ public interface KnowledgeRelationshipRepository extends JpaRepository<Knowledge
      * @return Optional containing the relationship with highest confidence
      */
     @Query("SELECT kr FROM KnowledgeRelationship kr WHERE kr.targetId = :targetId ORDER BY kr.confidence DESC")
-    Optional<KnowledgeRelationship> findTopByTargetIdOrderByConfidenceDesc(@Param("targetId") UUID targetId);
+    Optional<KnowledgeRelationship> findTopByTargetIdOrderByConfidenceDesc(@Param("targetId") String targetId);
 }

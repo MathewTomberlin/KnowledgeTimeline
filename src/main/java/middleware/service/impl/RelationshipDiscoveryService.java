@@ -70,8 +70,8 @@ public class RelationshipDiscoveryService {
                 
                 // Create relationship
                 KnowledgeRelationship relationship = new KnowledgeRelationship();
-                relationship.setSourceId(UUID.fromString(objectId));
-                relationship.setTargetId(UUID.fromString(match.getObjectId()));
+                relationship.setSourceId(objectId);
+                relationship.setTargetId(match.getObjectId());
                 relationship.setType(relationshipType);
                 relationship.setConfidence(match.getSimilarityScore());
                 relationship.setEvidence("Vector similarity: " + match.getSimilarityScore());
