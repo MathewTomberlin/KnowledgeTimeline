@@ -52,61 +52,61 @@ public class ApplicationConfig {
 
     /**
      * Configure context builder service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses real implementation for context building with MMR algorithm.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public ContextBuilderService contextBuilderService() {
-        return new MockContextBuilderService();
+        return new RealContextBuilderService();
     }
 
     /**
      * Configure token counting service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses real implementation for accurate token counting.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public TokenCountingService tokenCountingService() {
-        return new MockTokenCountingService();
+        return new RealTokenCountingService();
     }
 
     /**
      * Configure usage tracking service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses real implementation for usage and cost tracking.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public UsageTrackingService usageTrackingService() {
-        return new MockUsageTrackingService();
+        return new RealUsageTrackingService();
     }
 
     /**
      * Configure dialogue state service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses real implementation for session management.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public DialogueStateService dialogueStateService() {
-        return new MockDialogueStateService();
+        return new RealDialogueStateService();
     }
 
     /**
      * Configure memory extraction service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses real implementation for structured extraction.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public MemoryExtractionService memoryExtractionService() {
-        return new MockMemoryExtractionService();
+        return new RealMemoryExtractionService();
     }
 
     /**
      * Configure blob storage service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses real implementation for file storage.
      */
     @Bean
     @Profile({"local", "test", "docker"})
     public BlobStorageService blobStorageService() {
-        return new MockBlobStorageService();
+        return new RealBlobStorageService();
     }
 }

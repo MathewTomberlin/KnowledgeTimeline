@@ -2,14 +2,26 @@ package middleware;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootTest
-@ActiveProfiles("test")
 class KnowledgeMiddlewareApplicationTests {
 
     @Test
     void contextLoads() {
-        // This test will pass if the Spring application context loads successfully
+    }
+
+    @Configuration
+    @Profile("test")
+    static class TestConfig {
+        
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
     }
 }

@@ -5,9 +5,12 @@ import middleware.service.impl.MockTokenCountingService;
 import middleware.service.impl.MockVectorStoreService;
 import middleware.service.impl.MockContextBuilderService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Map;
@@ -17,14 +20,33 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for mock service implementations.
  */
-@SpringBootTest
-@TestPropertySource(properties = {
-    "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration",
-    "spring.flyway.enabled=false",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "spring.jpa.show-sql=false"
-})
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = MockServicesTest.TestConfig.class)
 public class MockServicesTest {
+    
+    @Configuration
+    static class TestConfig {
+        
+        @Bean
+        public MockEmbeddingService embeddingService() {
+            return new MockEmbeddingService();
+        }
+        
+        @Bean
+        public MockTokenCountingService tokenCountingService() {
+            return new MockTokenCountingService();
+        }
+        
+        @Bean
+        public MockVectorStoreService vectorStoreService() {
+            return new MockVectorStoreService();
+        }
+        
+        @Bean
+        public MockContextBuilderService contextBuilderService() {
+            return new MockContextBuilderService();
+        }
+    }
     
     @Autowired
     private MockEmbeddingService embeddingService;

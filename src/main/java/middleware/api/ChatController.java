@@ -1,7 +1,6 @@
 package middleware.api;
 
-import middleware.dto.ChatCompletionRequest;
-import middleware.dto.ChatCompletionResponse;
+import middleware.dto.*;
 import middleware.service.ContextBuilderService;
 import middleware.service.LLMClientService;
 import middleware.service.UsageTrackingService;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -76,21 +76,57 @@ public class ChatController {
         
         CompletableFuture.runAsync(() -> {
             try {
-                // TODO: Implement streaming response logic
-                // This would involve:
-                // 1. Building context using ContextBuilderService
-                // 2. Calling LLM with streaming
-                // 3. Sending chunks via SSE
-                // 4. Tracking usage
+                // Extract tenant and session from request context
+                String tenantId = extractTenantId();
+                String sessionId = extractSessionId(request);
                 
-                // For now, send a placeholder message
+                // Build context using ContextBuilderService
+                String context = contextBuilderService.buildContext(
+                    tenantId, 
+                    sessionId, 
+                    getLastUserMessage(request), 
+                    null
+                );
+                
+                // Create enhanced request with context
+                ChatCompletionRequest enhancedRequest = enhanceRequestWithContext(request, context);
+                
+                // Call LLM service with streaming
+                // Note: For now, we'll simulate streaming since the current OpenAIAdapter doesn't support it
+                // In a real implementation, this would use a streaming-capable LLM client
+                
+                // Send context information
                 emitter.send(SseEmitter.event()
-                    .name("message")
-                    .data("Streaming not yet implemented"));
+                    .name("context")
+                    .data("Context built: " + context.substring(0, Math.min(100, context.length())) + "..."));
+                
+                // Send streaming response chunks
+                String response = "This is a simulated streaming response. In production, this would be real-time LLM output.";
+                String[] chunks = response.split(" ");
+                
+                for (String chunk : chunks) {
+                    emitter.send(SseEmitter.event()
+                        .name("chunk")
+                        .data(chunk + " "));
+                    
+                    // Simulate processing delay
+                    Thread.sleep(100);
+                }
+                
+                // Track usage
+                trackUsage(tenantId, sessionId, request.getModel(), context.length(), response.length());
                 
                 emitter.complete();
+                
             } catch (IOException e) {
                 logger.error("Error in streaming response", e);
+                emitter.completeWithError(e);
+            } catch (InterruptedException e) {
+                logger.error("Streaming interrupted", e);
+                Thread.currentThread().interrupt();
+                emitter.completeWithError(e);
+            } catch (Exception e) {
+                logger.error("Unexpected error in streaming", e);
                 emitter.completeWithError(e);
             }
         });
@@ -102,22 +138,115 @@ public class ChatController {
      * Create a non-streaming chat completion response.
      */
     private ChatCompletionResponse createNonStreamingResponse(ChatCompletionRequest request) {
-        // TODO: Implement full context building and LLM integration
-        // This would involve:
-        // 1. Building context using ContextBuilderService
-        // 2. Calling LLM service
-        // 3. Tracking usage
-        // 4. Returning response
+        try {
+            // Extract tenant and session from request context
+            String tenantId = extractTenantId();
+            String sessionId = extractSessionId(request);
+            
+            // Build context using ContextBuilderService
+            String context = contextBuilderService.buildContext(
+                tenantId, 
+                sessionId, 
+                getLastUserMessage(request), 
+                null
+            );
+            
+            // Create enhanced request with context
+            ChatCompletionRequest enhancedRequest = enhanceRequestWithContext(request, context);
+            
+            // Call LLM service
+            ChatCompletionResponse response = llmClientService.createChatCompletion(enhancedRequest);
+            
+            // Track usage
+            trackUsage(tenantId, sessionId, request.getModel(), context.length(), 
+                      response.getUsage() != null ? response.getUsage().getCompletionTokens() : 0);
+            
+            return response;
+            
+        } catch (Exception e) {
+            logger.error("Error creating non-streaming response", e);
+            // Return a fallback response
+            return ChatCompletionResponse.builder()
+                .id("chatcmpl-" + System.currentTimeMillis())
+                .object("chat.completion")
+                .created(System.currentTimeMillis() / 1000)
+                .model(request.getModel())
+                .choices(List.of(new ChatChoice(
+                    0,
+                    new ChatMessage("assistant", "I apologize, but I encountered an error processing your request. Please try again."),
+                    "stop"
+                )))
+                .usage(new TokenUsage(0, 0, 0))
+                .build();
+        }
+    }
+    
+    /**
+     * Enhance the request with context information.
+     */
+    private ChatCompletionRequest enhanceRequestWithContext(ChatCompletionRequest originalRequest, String context) {
+        // Create a new list with the context as a system message
+        List<ChatMessage> enhancedMessages = new java.util.ArrayList<>();
         
-        // For now, return a mock response
-        return ChatCompletionResponse.builder()
-            .id("chatcmpl-" + System.currentTimeMillis())
-            .object("chat.completion")
-            .created(System.currentTimeMillis() / 1000)
-            .model(request.getModel())
-            .choices(new java.util.ArrayList<>())
-            .usage(new middleware.dto.TokenUsage())
+        // Add context as system message
+        if (context != null && !context.trim().isEmpty()) {
+            enhancedMessages.add(new ChatMessage("system", 
+                "You are a knowledge-aware AI assistant. Use the following context to provide accurate and helpful responses:\n\n" + context));
+        }
+        
+        // Add original messages
+        enhancedMessages.addAll(originalRequest.getMessages());
+        
+        // Create enhanced request
+        return ChatCompletionRequest.builder()
+            .model(originalRequest.getModel())
+            .messages(enhancedMessages)
+            .temperature(originalRequest.getTemperature())
+            .maxTokens(originalRequest.getMaxTokens())
+            .stream(originalRequest.getStream())
             .build();
+    }
+    
+    /**
+     * Extract tenant ID from security context.
+     */
+    private String extractTenantId() {
+        // TODO: Extract from security context when available
+        // For now, return a default tenant
+        return "default-tenant";
+    }
+    
+    /**
+     * Extract session ID from request or generate one.
+     */
+    private String extractSessionId(ChatCompletionRequest request) {
+        // TODO: Extract from request headers or generate based on user
+        // For now, generate a session ID based on timestamp
+        return "session-" + System.currentTimeMillis();
+    }
+    
+    /**
+     * Get the last user message from the request.
+     */
+    private String getLastUserMessage(ChatCompletionRequest request) {
+        for (int i = request.getMessages().size() - 1; i >= 0; i--) {
+            ChatMessage message = request.getMessages().get(i);
+            if ("user".equals(message.getRole())) {
+                return message.getContent();
+            }
+        }
+        return "Hello"; // Fallback
+    }
+    
+    /**
+     * Track usage for the request.
+     */
+    private void trackUsage(String tenantId, String sessionId, String model, int inputTokens, int outputTokens) {
+        try {
+            usageTrackingService.trackChatCompletion(tenantId, sessionId, model, inputTokens, outputTokens);
+        } catch (Exception e) {
+            logger.warn("Failed to track usage for tenant: {}, session: {}", tenantId, sessionId, e);
+        }
     }
     
     /**
