@@ -2,9 +2,12 @@ package middleware.config;
 
 import middleware.service.*;
 import middleware.service.impl.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import javax.sql.DataSource;
 
 /**
  * Main application configuration class.
@@ -15,12 +18,13 @@ public class ApplicationConfig {
 
     /**
      * Configure LLM client service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses OpenAI adapter for local development and testing.
      */
     @Bean
     @Profile({"local", "test", "docker"})
-    public LLMClientService llmClientService() {
-        return new MockLLMClientService();
+    public LLMClientService llmClientService(@Value("${knowledge.llm.api-key:}") String apiKey,
+                                            @Value("${knowledge.llm.base-url:https://api.openai.com/v1}") String baseUrl) {
+        return new OpenAIAdapter(apiKey, baseUrl);
     }
 
     /**
@@ -35,12 +39,13 @@ public class ApplicationConfig {
 
     /**
      * Configure vector store service implementation.
-     * Uses mock implementation for local development and testing.
+     * Uses PostgreSQL pgvector adapter for local development and testing.
      */
     @Bean
     @Profile({"local", "test", "docker"})
-    public VectorStoreService vectorStoreService() {
-        return new MockVectorStoreService();
+    public VectorStoreService vectorStoreService(DataSource dataSource,
+                                               @Value("${knowledge.embeddings.dimension:384}") int embeddingDimension) {
+        return new PostgresPgvectorAdapter(dataSource, embeddingDimension);
     }
 
     /**
