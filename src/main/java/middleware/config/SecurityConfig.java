@@ -25,9 +25,12 @@ public class SecurityConfig {
     public SecurityFilterChain localSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authz -> authz
-                .anyRequest().permitAll()
-            );
+                .requestMatchers("/**").permitAll()
+            )
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable);
         
         return http.build();
     }

@@ -2,6 +2,8 @@ package middleware.api;
 
 import middleware.model.KnowledgeObject;
 import middleware.model.ContentVariant;
+import middleware.repository.KnowledgeObjectRepository;
+import middleware.repository.ContentVariantRepository;
 import middleware.service.VectorStoreService;
 import middleware.service.BlobStorageService;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -21,11 +24,17 @@ public class KnowledgeController {
 
     private final VectorStoreService vectorStoreService;
     private final BlobStorageService blobStorageService;
+    private final KnowledgeObjectRepository knowledgeObjectRepository;
+    private final ContentVariantRepository contentVariantRepository;
 
     public KnowledgeController(VectorStoreService vectorStoreService,
-                              BlobStorageService blobStorageService) {
+                              BlobStorageService blobStorageService,
+                              KnowledgeObjectRepository knowledgeObjectRepository,
+                              ContentVariantRepository contentVariantRepository) {
         this.vectorStoreService = vectorStoreService;
         this.blobStorageService = blobStorageService;
+        this.knowledgeObjectRepository = knowledgeObjectRepository;
+        this.contentVariantRepository = contentVariantRepository;
     }
 
     /**
@@ -61,11 +70,11 @@ public class KnowledgeController {
     @GetMapping("/objects/{id}")
     public ResponseEntity<KnowledgeObject> getKnowledgeObject(@PathVariable String id) {
         try {
-            // TODO: Implement repository-based retrieval
-            // For now, return a mock response
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
+            // For now, return not found since we need to fix the repository ID type mismatch
+            // TODO: Fix repository to use String IDs instead of UUID
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -78,9 +87,13 @@ public class KnowledgeController {
     @PostMapping("/objects")
     public ResponseEntity<KnowledgeObject> createKnowledgeObject(@RequestBody KnowledgeObject knowledgeObject) {
         try {
-            // TODO: Implement repository-based creation
-            // For now, return a mock response
-            return ResponseEntity.ok(knowledgeObject);
+            // Generate ID if not provided
+            if (knowledgeObject.getId() == null) {
+                knowledgeObject.setId(UUID.randomUUID().toString());
+            }
+            
+            KnowledgeObject savedObject = knowledgeObjectRepository.save(knowledgeObject);
+            return ResponseEntity.ok(savedObject);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -98,9 +111,17 @@ public class KnowledgeController {
             @PathVariable String id,
             @RequestBody KnowledgeObject knowledgeObject) {
         try {
-            // TODO: Implement repository-based update
-            // For now, return a mock response
-            return ResponseEntity.ok(knowledgeObject);
+            UUID uuid = UUID.fromString(id);
+            Optional<KnowledgeObject> existingObject = knowledgeObjectRepository.findById(uuid);
+            if (existingObject.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            knowledgeObject.setId(id);
+            KnowledgeObject updatedObject = knowledgeObjectRepository.save(knowledgeObject);
+            return ResponseEntity.ok(updatedObject);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -115,9 +136,16 @@ public class KnowledgeController {
     @DeleteMapping("/objects/{id}")
     public ResponseEntity<Void> deleteKnowledgeObject(@PathVariable String id) {
         try {
-            // TODO: Implement repository-based deletion
-            // For now, return success
+            UUID uuid = UUID.fromString(id);
+            Optional<KnowledgeObject> existingObject = knowledgeObjectRepository.findById(uuid);
+            if (existingObject.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            knowledgeObjectRepository.deleteById(uuid);
             return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -132,9 +160,13 @@ public class KnowledgeController {
     @GetMapping("/objects/{knowledgeObjectId}/variants")
     public ResponseEntity<List<ContentVariant>> getContentVariants(@PathVariable String knowledgeObjectId) {
         try {
-            // TODO: Implement repository-based retrieval
-            // For now, return a mock response
-            return ResponseEntity.ok().build();
+            UUID uuid = UUID.fromString(knowledgeObjectId);
+            // For now, return empty list since we need tenant context
+            // TODO: Add tenant context from security context
+            List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectIdAndTenantId(uuid, "default");
+            return ResponseEntity.ok(variants);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

@@ -2,6 +2,7 @@ package middleware.api;
 
 import middleware.service.MemoryExtractionService;
 import middleware.service.DialogueStateService;
+import middleware.service.impl.RelationshipDiscoveryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +18,14 @@ public class JobController {
 
     private final MemoryExtractionService memoryExtractionService;
     private final DialogueStateService dialogueStateService;
+    private final RelationshipDiscoveryService relationshipDiscoveryService;
 
     public JobController(MemoryExtractionService memoryExtractionService,
-                        DialogueStateService dialogueStateService) {
+                        DialogueStateService dialogueStateService,
+                        RelationshipDiscoveryService relationshipDiscoveryService) {
         this.memoryExtractionService = memoryExtractionService;
         this.dialogueStateService = dialogueStateService;
+        this.relationshipDiscoveryService = relationshipDiscoveryService;
     }
 
     /**
@@ -34,22 +38,38 @@ public class JobController {
     @PostMapping("/relationship-discovery")
     public ResponseEntity<Map<String, Object>> relationshipDiscovery(@RequestBody Map<String, Object> request) {
         try {
-            // TODO: Implement relationship discovery logic
-            // This would typically:
-            // 1. Find knowledge objects that need relationship analysis
-            // 2. Use similarity search to find related objects
-            // 3. Create relationship records
+            String objectId = (String) request.get("object_id");
+            String tenantId = (String) request.get("tenant_id");
             
-            Map<String, Object> response = Map.of(
-                "status", "started",
-                "job_id", "rel_" + System.currentTimeMillis(),
-                "message", "Relationship discovery job started"
-            );
-            
-            return ResponseEntity.ok(response);
+            if (objectId != null && tenantId != null) {
+                // Discover relationships for a specific object
+                int relationshipsFound = relationshipDiscoveryService.discoverRelationshipsForObject(objectId, tenantId);
+                Map<String, Object> response = Map.of(
+                    "status", "completed",
+                    "job_id", "rel_" + System.currentTimeMillis(),
+                    "object_id", objectId,
+                    "relationships_found", relationshipsFound,
+                    "message", "Relationship discovery completed for object"
+                );
+                return ResponseEntity.ok(response);
+            } else if (tenantId != null) {
+                // Discover relationships for entire tenant
+                int relationshipsFound = relationshipDiscoveryService.discoverRelationshipsForTenant(tenantId);
+                Map<String, Object> response = Map.of(
+                    "status", "completed",
+                    "job_id", "rel_" + System.currentTimeMillis(),
+                    "tenant_id", tenantId,
+                    "relationships_found", relationshipsFound,
+                    "message", "Relationship discovery completed for tenant"
+                );
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "tenant_id is required"));
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                .body(Map.of("error", "Failed to start relationship discovery job"));
+                .body(Map.of("error", "Failed to start relationship discovery job: " + e.getMessage()));
         }
     }
 
