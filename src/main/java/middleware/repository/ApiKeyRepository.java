@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for ApiKey entity operations.
@@ -39,7 +38,7 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
      * @param tenantId The tenant identifier
      * @return List of API keys for the tenant
      */
-    @Query("SELECT ak FROM ApiKey ak WHERE ak.tenant.tenantId = :tenantId")
+    @Query("SELECT ak FROM ApiKey ak WHERE ak.tenantId = :tenantId")
     java.util.List<ApiKey> findByTenantId(@Param("tenantId") String tenantId);
 
     /**
@@ -48,7 +47,7 @@ public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
      * @param tenantId The tenant identifier
      * @return List of active API keys for the tenant
      */
-    @Query("SELECT ak FROM ApiKey ak WHERE ak.tenant.tenantId = :tenantId AND ak.active = true")
+    @Query("SELECT ak FROM ApiKey ak WHERE ak.tenantId = :tenantId AND ak.active = true")
     java.util.List<ApiKey> findActiveByTenantId(@Param("tenantId") String tenantId);
 
     /**

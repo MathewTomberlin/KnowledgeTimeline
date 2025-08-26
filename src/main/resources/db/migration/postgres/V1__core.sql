@@ -34,7 +34,7 @@ CREATE TABLE knowledge_objects (
     type VARCHAR(50) NOT NULL,
     session_id VARCHAR(255),
     user_id VARCHAR(255),
-    parent_id UUID,
+    parent_id VARCHAR(36),
     tags TEXT, -- JSON array of tags
     metadata TEXT, -- JSON object
     archived BOOLEAN NOT NULL DEFAULT false,
@@ -45,7 +45,7 @@ CREATE TABLE knowledge_objects (
 
 -- Content Variants table
 CREATE TABLE content_variants (
-    id UUID PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     knowledge_object_id VARCHAR(36) NOT NULL,
     variant VARCHAR(50) NOT NULL,
     content TEXT, -- nullable if stored in blob
@@ -58,9 +58,9 @@ CREATE TABLE content_variants (
 
 -- Knowledge Relationships table
 CREATE TABLE knowledge_relationships (
-    id UUID PRIMARY KEY,
-    source_id UUID NOT NULL,
-    target_id UUID NOT NULL,
+    id VARCHAR(36) PRIMARY KEY,
+    source_id VARCHAR(36) NOT NULL,
+    target_id VARCHAR(36) NOT NULL,
     type VARCHAR(50) NOT NULL,
     confidence DOUBLE PRECISION,
     evidence TEXT, -- JSON object
@@ -103,7 +103,7 @@ CREATE TABLE usage_logs (
 -- Embeddings table for vector storage
 CREATE TABLE embeddings (
     id VARCHAR(36) PRIMARY KEY,
-    variant_id UUID NOT NULL,
+    variant_id VARCHAR(36) NOT NULL,
     text_snippet TEXT NOT NULL,
     embedding vector(384), -- 384-dimensional vector for MiniLM-L6-v2
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

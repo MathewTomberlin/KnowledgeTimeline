@@ -80,12 +80,12 @@ public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject
     /**
      * Find knowledge objects by tags and tenant.
      *
-     * @param tags The tags to search for
+     * @param tag The tag to search for
      * @param tenantId The tenant identifier
      * @param pageable Pagination parameters
      * @return Page of knowledge objects
      */
-    @Query("SELECT ko FROM KnowledgeObject ko WHERE ko.tenantId = :tenantId AND :tag MEMBER OF ko.tags")
+    @Query("SELECT ko FROM KnowledgeObject ko WHERE ko.tenantId = :tenantId AND ko.tags LIKE CONCAT('%', :tag, '%')")
     Page<KnowledgeObject> findByTagsContainingAndTenantId(@Param("tag") String tag, @Param("tenantId") String tenantId, Pageable pageable);
 
     /**

@@ -19,51 +19,46 @@ import java.util.UUID;
 public interface ContentVariantRepository extends JpaRepository<ContentVariant, UUID> {
 
     /**
-     * Find a content variant by its ID and tenant.
+     * Find a content variant by its ID.
      *
      * @param id The content variant ID
-     * @param tenantId The tenant identifier
      * @return Optional containing the content variant if found
      */
-    Optional<ContentVariant> findByIdAndTenantId(UUID id, String tenantId);
+    Optional<ContentVariant> findById(UUID id);
 
     /**
      * Find all content variants for a knowledge object.
      *
      * @param knowledgeObjectId The knowledge object ID
-     * @param tenantId The tenant identifier
      * @return List of content variants
      */
-    List<ContentVariant> findByKnowledgeObjectIdAndTenantId(UUID knowledgeObjectId, String tenantId);
+    List<ContentVariant> findByKnowledgeObjectId(String knowledgeObjectId);
 
     /**
      * Find content variants by type for a knowledge object.
      *
      * @param knowledgeObjectId The knowledge object ID
      * @param type The content variant type
-     * @param tenantId The tenant identifier
      * @return List of content variants
      */
-    List<ContentVariant> findByKnowledgeObjectIdAndTypeAndTenantId(UUID knowledgeObjectId, ContentVariantType type, String tenantId);
+    List<ContentVariant> findByKnowledgeObjectIdAndVariant(String knowledgeObjectId, ContentVariantType type);
 
     /**
      * Find a specific content variant by knowledge object and type.
      *
      * @param knowledgeObjectId The knowledge object ID
      * @param type The content variant type
-     * @param tenantId The tenant identifier
      * @return Optional containing the content variant if found
      */
-    Optional<ContentVariant> findByKnowledgeObjectIdAndTypeAndTenantIdOrderByCreatedAtDesc(UUID knowledgeObjectId, ContentVariantType type, String tenantId);
+    Optional<ContentVariant> findByKnowledgeObjectIdAndVariantOrderByCreatedAtDesc(String knowledgeObjectId, ContentVariantType type);
 
     /**
      * Find content variants by embedding ID.
      *
      * @param embeddingId The embedding identifier
-     * @param tenantId The tenant identifier
      * @return Optional containing the content variant if found
      */
-    Optional<ContentVariant> findByEmbeddingIdAndTenantId(String embeddingId, String tenantId);
+    Optional<ContentVariant> findByEmbeddingId(String embeddingId);
 
     /**
      * Find content variants that have embeddings.
@@ -71,17 +66,16 @@ public interface ContentVariantRepository extends JpaRepository<ContentVariant, 
      * @param tenantId The tenant identifier
      * @return List of content variants with embeddings
      */
-    @Query("SELECT cv FROM ContentVariant cv WHERE cv.tenantId = :tenantId AND cv.embeddingId IS NOT NULL")
+    @Query("SELECT cv FROM ContentVariant cv JOIN KnowledgeObject ko ON cv.knowledgeObjectId = ko.id WHERE ko.tenantId = :tenantId AND cv.embeddingId IS NOT NULL")
     List<ContentVariant> findWithEmbeddingsByTenantId(@Param("tenantId") String tenantId);
 
     /**
      * Find content variants by storage URI.
      *
      * @param storageUri The storage URI
-     * @param tenantId The tenant identifier
      * @return Optional containing the content variant if found
      */
-    Optional<ContentVariant> findByStorageUriAndTenantId(String storageUri, String tenantId);
+    Optional<ContentVariant> findByStorageUri(String storageUri);
 
     /**
      * Find content variants that have content stored in blob storage.
@@ -89,26 +83,24 @@ public interface ContentVariantRepository extends JpaRepository<ContentVariant, 
      * @param tenantId The tenant identifier
      * @return List of content variants with blob storage
      */
-    @Query("SELECT cv FROM ContentVariant cv WHERE cv.tenantId = :tenantId AND cv.storageUri IS NOT NULL")
+    @Query("SELECT cv FROM ContentVariant cv JOIN KnowledgeObject ko ON cv.knowledgeObjectId = ko.id WHERE ko.tenantId = :tenantId AND cv.storageUri IS NOT NULL")
     List<ContentVariant> findWithBlobStorageByTenantId(@Param("tenantId") String tenantId);
 
     /**
      * Find content variants by multiple knowledge object IDs.
      *
      * @param knowledgeObjectIds List of knowledge object IDs
-     * @param tenantId The tenant identifier
      * @return List of content variants
      */
-    @Query("SELECT cv FROM ContentVariant cv WHERE cv.knowledgeObjectId IN :knowledgeObjectIds AND cv.tenantId = :tenantId")
-    List<ContentVariant> findByKnowledgeObjectIdInAndTenantId(@Param("knowledgeObjectIds") List<UUID> knowledgeObjectIds, @Param("tenantId") String tenantId);
+    @Query("SELECT cv FROM ContentVariant cv WHERE cv.knowledgeObjectId IN :knowledgeObjectIds")
+    List<ContentVariant> findByKnowledgeObjectIdIn(@Param("knowledgeObjectIds") List<String> knowledgeObjectIds);
 
     /**
      * Count content variants by type for a knowledge object.
      *
      * @param knowledgeObjectId The knowledge object ID
      * @param type The content variant type
-     * @param tenantId The tenant identifier
      * @return Count of content variants
      */
-    long countByKnowledgeObjectIdAndTypeAndTenantId(UUID knowledgeObjectId, ContentVariantType type, String tenantId);
+    long countByKnowledgeObjectIdAndVariant(String knowledgeObjectId, ContentVariantType type);
 }

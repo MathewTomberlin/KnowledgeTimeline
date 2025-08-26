@@ -158,9 +158,9 @@ public class KnowledgeController {
     @GetMapping("/objects/{knowledgeObjectId}/variants")
     public ResponseEntity<List<ContentVariant>> getContentVariants(@PathVariable String knowledgeObjectId) {
         try {
-            // For now, return empty list since we need tenant context
+            // For now, return variants for the knowledge object
             // TODO: Add tenant context from security context
-            List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectIdAndTenantId(UUID.fromString(knowledgeObjectId), "default");
+            List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectId(knowledgeObjectId);
             return ResponseEntity.ok(variants);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

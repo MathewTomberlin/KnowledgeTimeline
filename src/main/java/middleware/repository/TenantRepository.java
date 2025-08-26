@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for Tenant entity operations.
@@ -38,7 +37,7 @@ public interface TenantRepository extends JpaRepository<Tenant, String> {
      * @param apiKeyHash The hashed API key
      * @return Optional containing the tenant if found
      */
-    @Query("SELECT t FROM Tenant t JOIN t.apiKeys ak WHERE ak.keyHash = :apiKeyHash")
+    @Query("SELECT t FROM Tenant t JOIN ApiKey ak ON t.tenantId = ak.tenantId WHERE ak.keyHash = :apiKeyHash")
     Optional<Tenant> findByApiKeyHash(@Param("apiKeyHash") String apiKeyHash);
 
     /**

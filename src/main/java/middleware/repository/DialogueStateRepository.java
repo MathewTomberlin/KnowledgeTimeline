@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for DialogueState entity operations.
@@ -27,7 +26,7 @@ public interface DialogueStateRepository extends JpaRepository<DialogueState, St
      * @param tenantId The tenant identifier
      * @return Optional containing the dialogue state if found
      */
-    Optional<DialogueState> findByIdAndTenantId(UUID id, String tenantId);
+    Optional<DialogueState> findByIdAndTenantId(String id, String tenantId);
 
     /**
      * Find a dialogue state by session ID and tenant.
@@ -118,6 +117,6 @@ public interface DialogueStateRepository extends JpaRepository<DialogueState, St
      * @param pageable Pagination parameters
      * @return Page of dialogue states
      */
-    @Query("SELECT ds FROM DialogueState ds WHERE ds.tenantId = :tenantId AND :topic MEMBER OF ds.topics")
+    @Query("SELECT ds FROM DialogueState ds WHERE ds.tenantId = :tenantId AND ds.topics LIKE CONCAT('%', :topic, '%')")
     Page<DialogueState> findByTopicsContainingAndTenantId(@Param("topic") String topic, @Param("tenantId") String tenantId, Pageable pageable);
 }
