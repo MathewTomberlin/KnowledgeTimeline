@@ -111,8 +111,7 @@ public class KnowledgeController {
             @PathVariable String id,
             @RequestBody KnowledgeObject knowledgeObject) {
         try {
-            UUID uuid = UUID.fromString(id);
-            Optional<KnowledgeObject> existingObject = knowledgeObjectRepository.findById(uuid);
+            Optional<KnowledgeObject> existingObject = knowledgeObjectRepository.findById(id);
             if (existingObject.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
@@ -136,13 +135,12 @@ public class KnowledgeController {
     @DeleteMapping("/objects/{id}")
     public ResponseEntity<Void> deleteKnowledgeObject(@PathVariable String id) {
         try {
-            UUID uuid = UUID.fromString(id);
-            Optional<KnowledgeObject> existingObject = knowledgeObjectRepository.findById(uuid);
+            Optional<KnowledgeObject> existingObject = knowledgeObjectRepository.findById(id);
             if (existingObject.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
             
-            knowledgeObjectRepository.deleteById(uuid);
+            knowledgeObjectRepository.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -160,10 +158,9 @@ public class KnowledgeController {
     @GetMapping("/objects/{knowledgeObjectId}/variants")
     public ResponseEntity<List<ContentVariant>> getContentVariants(@PathVariable String knowledgeObjectId) {
         try {
-            UUID uuid = UUID.fromString(knowledgeObjectId);
             // For now, return empty list since we need tenant context
             // TODO: Add tenant context from security context
-            List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectIdAndTenantId(uuid, "default");
+            List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectIdAndTenantId(UUID.fromString(knowledgeObjectId), "default");
             return ResponseEntity.ok(variants);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

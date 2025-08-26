@@ -18,7 +18,7 @@ import java.util.UUID;
  * Provides data access methods for dialogue state management.
  */
 @Repository
-public interface DialogueStateRepository extends JpaRepository<DialogueState, UUID> {
+public interface DialogueStateRepository extends JpaRepository<DialogueState, String> {
 
     /**
      * Find a dialogue state by its ID and tenant.

@@ -19,7 +19,7 @@ import java.util.UUID;
  * Provides data access methods for knowledge management.
  */
 @Repository
-public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject, UUID> {
+public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject, String> {
 
     /**
      * Find a knowledge object by its ID and tenant.
@@ -28,7 +28,7 @@ public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject
      * @param tenantId The tenant identifier
      * @return Optional containing the knowledge object if found
      */
-    Optional<KnowledgeObject> findByIdAndTenantId(UUID id, String tenantId);
+    Optional<KnowledgeObject> findByIdAndTenantId(String id, String tenantId);
 
     /**
      * Find all knowledge objects for a specific tenant.
@@ -75,7 +75,7 @@ public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject
      * @param tenantId The tenant identifier
      * @return List of child knowledge objects
      */
-    List<KnowledgeObject> findByParentIdAndTenantId(UUID parentId, String tenantId);
+    List<KnowledgeObject> findByParentIdAndTenantId(String parentId, String tenantId);
 
     /**
      * Find knowledge objects by tags and tenant.

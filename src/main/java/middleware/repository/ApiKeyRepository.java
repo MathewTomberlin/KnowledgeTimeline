@@ -14,7 +14,7 @@ import java.util.UUID;
  * Provides data access methods for API key authentication.
  */
 @Repository
-public interface ApiKeyRepository extends JpaRepository<ApiKey, UUID> {
+public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
 
     /**
      * Find an API key by its hash.

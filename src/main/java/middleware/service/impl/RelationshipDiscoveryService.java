@@ -42,8 +42,7 @@ public class RelationshipDiscoveryService {
     public int discoverRelationshipsForObject(String objectId, String tenantId) {
         try {
             // Find the source knowledge object
-            UUID uuid = UUID.fromString(objectId);
-            var sourceObject = knowledgeObjectRepository.findByIdAndTenantId(uuid, tenantId);
+            var sourceObject = knowledgeObjectRepository.findByIdAndTenantId(objectId, tenantId);
             if (sourceObject.isEmpty()) {
                 return 0;
             }
@@ -71,7 +70,7 @@ public class RelationshipDiscoveryService {
                 
                 // Create relationship
                 KnowledgeRelationship relationship = new KnowledgeRelationship();
-                relationship.setSourceId(uuid);
+                relationship.setSourceId(UUID.fromString(objectId));
                 relationship.setTargetId(UUID.fromString(match.getObjectId()));
                 relationship.setType(relationshipType);
                 relationship.setConfidence(match.getSimilarityScore());

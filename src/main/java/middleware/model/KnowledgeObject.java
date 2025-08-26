@@ -26,7 +26,7 @@ public class KnowledgeObject {
     private String userId;
     
     @Column(name = "parent_id")
-    private UUID parentId;
+    private String parentId;
     
     @Column(name = "tags", columnDefinition = "TEXT")
     private String tags; // JSON array of tags
@@ -99,11 +99,11 @@ public class KnowledgeObject {
         this.userId = userId;
     }
     
-    public UUID getParentId() {
+    public String getParentId() {
         return parentId;
     }
     
-    public void setParentId(UUID parentId) {
+    public void setParentId(String parentId) {
         this.parentId = parentId;
     }
     

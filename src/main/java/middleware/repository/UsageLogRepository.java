@@ -17,7 +17,7 @@ import java.util.UUID;
  * Provides data access methods for usage tracking and billing.
  */
 @Repository
-public interface UsageLogRepository extends JpaRepository<UsageLog, UUID> {
+public interface UsageLogRepository extends JpaRepository<UsageLog, String> {
 
     /**
      * Find usage logs by tenant.

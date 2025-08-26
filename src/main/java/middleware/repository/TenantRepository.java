@@ -14,7 +14,7 @@ import java.util.UUID;
  * Provides data access methods for multi-tenant functionality.
  */
 @Repository
-public interface TenantRepository extends JpaRepository<Tenant, UUID> {
+public interface TenantRepository extends JpaRepository<Tenant, String> {
 
     /**
      * Find a tenant by their unique identifier.
