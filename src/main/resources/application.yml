@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: knowledge-middleware
+  
+  profiles:
+    active: local
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+  
+  security:
+    user:
+      name: admin
+      password: admin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    middleware: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# Knowledge middleware specific settings
+knowledge:
+  token-budget:
+    default: 2000
+  retrieval:
+    k: 40
+    mmr-diversity: 0.3
+    recency-decay: 0.03
+  micro-quote:
+    max-tokens: 120
+  session:
+    summarize-turns: 10
+    summarize-tokens: 3000
+  rate-limits:
+    default-requests-per-minute: 60
+    default-burst: 120
