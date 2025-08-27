@@ -2,6 +2,7 @@ package middleware.config;
 
 import middleware.service.*;
 import middleware.service.impl.*;
+import middleware.vector.impl.PostgresPgvectorAdapter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +48,7 @@ public class ApplicationConfig {
     @Profile({"local", "test", "docker"})
     public VectorStoreService vectorStoreService(DataSource dataSource,
                                                @Value("${knowledge.embeddings.dimension:384}") int embeddingDimension) {
-        return new PostgresPgvectorAdapter(dataSource, embeddingDimension);
+        return new PostgresPgvectorAdapter(dataSource);
     }
 
     /**
