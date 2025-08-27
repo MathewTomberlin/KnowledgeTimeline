@@ -36,15 +36,16 @@ public class OllamaAdapter implements LLMClientService {
 
     public OllamaAdapter(@Value("${knowledge.llm.base-url:http://localhost:11434}") String baseUrl,
                         @Value("${knowledge.llm.model:llama2}") String defaultModel) {
-        this.baseUrl = baseUrl;
+        // Ensure baseUrl doesn't end with /api to avoid duplicate paths
+        this.baseUrl = baseUrl.endsWith("/api") ? baseUrl.substring(0, baseUrl.length() - 4) : baseUrl;
         this.defaultModel = defaultModel;
 
         this.webClient = WebClient.builder()
-            .baseUrl(baseUrl)
+            .baseUrl(this.baseUrl)
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .build();
 
-        logger.info("OllamaAdapter initialized with baseUrl: {} and defaultModel: {}", baseUrl, defaultModel);
+        logger.info("OllamaAdapter initialized with baseUrl: {} and defaultModel: {}", this.baseUrl, defaultModel);
     }
 
     @Override
