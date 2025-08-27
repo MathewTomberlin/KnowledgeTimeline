@@ -16,7 +16,7 @@ This document tracks the implementation status of the Knowledge-Aware LLM Middle
 - **API Endpoints**: OpenAI-compatible chat completions with real service integration
 - **Database**: PostgreSQL with pgvector, migrations working
 - **Vector Storage**: PostgresPgvectorAdapter with similarity search
-- **Embeddings**: LocalEmbeddingService with HuggingFace integration
+- **Embeddings**: Ollama container integration (no CUDA required)
 - **LLM Integration**: OpenAIAdapter with fallback mechanisms
 - **Memory Extraction**: RealMemoryExtractionService with LLM-based extraction
 - **Context Building**: ContextBuilderService with MMR algorithm
@@ -212,8 +212,8 @@ We have successfully implemented and integrated all the core components required
   - Batch processing capabilities
   - Comprehensive unit tests (5 passing tests)
 
-- [x] **LocalEmbeddingService**
-  - Real implementation using HuggingFace text-embeddings-inference
+- [x] **Ollama Embedding Integration**
+- Container-based embedding service (no CUDA required)
   - Fallback to mock embeddings when service unavailable
   - Health check functionality
   - Configurable model and dimensions

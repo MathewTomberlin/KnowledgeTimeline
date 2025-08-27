@@ -25,7 +25,7 @@ spring:
 # Test settings
 knowledge:
   embeddings:
-    url: http://localhost:8081/embeddings
+    url: http://localhost:11434/api/embeddings
     model: sentence-transformers/all-MiniLM-L6-v2
   
   llm:

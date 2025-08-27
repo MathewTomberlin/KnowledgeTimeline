@@ -134,7 +134,7 @@ This directory contains PowerShell scripts to manage the Knowledge-Aware LLM Mid
 
 1. **Services won't start**
    - Check Docker Desktop is running
-   - Ensure ports 5432, 6379, 8080, 8081 are available
+   - Ensure ports 5432, 6379, 8080, 11434 are available
    - Run `.\scripts\cleanup.ps1` to clear conflicts
 
 2. **Database connection issues**

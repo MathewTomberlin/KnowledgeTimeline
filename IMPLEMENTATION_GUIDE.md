@@ -70,7 +70,7 @@ SPRING_PROFILES_ACTIVE, PRICING_TABLE_JSON (optional), RATE_LIMITS_JSON
     • middleware: exposes 8080, SPRING_PROFILES_ACTIVE=local
     • postgres: pgvector/pgvector:pg15, mounts init.sql
     • redis: redis:7-alpine
-    • embeddings: huggingface/text-embeddings-inference:cpu-1.2 (MiniLM-L6-v2)
+    • embeddings: ollama/ollama:latest (nomic-embed-text model)
     • Optional: Ollama or vLLM for local LLM testing
 Network: default bridge; .env file for non-secret defaults.
 7. Data Model (Summary-First, Multi-Tenant)

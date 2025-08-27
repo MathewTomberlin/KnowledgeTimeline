@@ -75,7 +75,7 @@ function Test-DockerRunning {
 
 # Function to check if required ports are available
 function Test-PortsAvailable {
-    $requiredPorts = @(5432, 6379, 8080, 8081)
+    $requiredPorts = @(5432, 6379, 8080, 11434)
     $conflicts = @()
     
     foreach ($port in $requiredPorts) {

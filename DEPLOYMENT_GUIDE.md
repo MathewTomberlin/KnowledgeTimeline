@@ -17,7 +17,7 @@ This guide provides comprehensive deployment instructions for the Knowledge-Awar
 
 ### Required Services
 - **LLM Service**: OpenAI API, Ollama, or compatible service
-- **Embedding Service**: OpenAI Embeddings, HuggingFace TGI, or compatible service
+- **Embedding Service**: OpenAI Embeddings, Ollama, or compatible service
 - **Vector Database**: PostgreSQL with pgvector or Oracle Vector
 - **Object Storage**: AWS S3, Google Cloud Storage, or OCI Object Storage
 
@@ -47,7 +47,7 @@ docker exec knowledge-postgres pg_isready -U postgres -d knowledge_middleware
 docker exec knowledge-redis redis-cli ping
 
 # Check Embeddings service
-curl -f http://localhost:8081/health
+curl -f http://localhost:11434/api/embeddings
 
 # Check Ollama (if enabled)
 curl -f http://localhost:11434/api/tags
@@ -467,8 +467,8 @@ llm:
     type: ollama
   embedding:
     service:
-      url: http://localhost:8081
-      type: huggingface
+      url: http://localhost:11434
+      type: ollama
 
 logging:
   level:
