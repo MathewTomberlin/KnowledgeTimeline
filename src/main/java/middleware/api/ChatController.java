@@ -4,8 +4,10 @@ import middleware.dto.*;
 import middleware.service.ContextBuilderService;
 import middleware.service.LLMClientService;
 import middleware.service.UsageTrackingService;
+import middleware.service.MemoryStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,9 @@ public class ChatController {
     
     @Autowired
     private UsageTrackingService usageTrackingService;
+    
+    @Autowired
+    private MemoryStorageService memoryStorageService;
     
     /**
      * Create a chat completion with optional streaming support.
@@ -113,6 +118,20 @@ public class ChatController {
                     Thread.sleep(100);
                 }
                 
+                // Store conversation and extract memories after streaming completes
+                try {
+                    String userMessage = getLastUserMessage(request);
+                    Map<String, Object> contextMetadata = Map.of("context_length", context.length(), "model", request.getModel());
+                    
+                    memoryStorageService.processConversationTurn(
+                        tenantId, sessionId, "default-user", userMessage, response, contextMetadata);
+                    
+                    logger.debug("Successfully processed conversation turn for tenant: {}, session: {}", tenantId, sessionId);
+                } catch (Exception e) {
+                    logger.warn("Failed to process conversation turn for tenant: {}, session: {}", tenantId, sessionId, e);
+                    // Don't fail the request if memory storage fails
+                }
+                
                 // Track usage
                 trackUsage(tenantId, sessionId, request.getModel(), context.length(), response.length());
                 
@@ -156,6 +175,23 @@ public class ChatController {
             
             // Call LLM service
             ChatCompletionResponse response = llmClientService.createChatCompletion(enhancedRequest);
+            
+            // Extract the assistant's response for memory storage
+            String assistantResponse = extractAssistantResponse(response);
+            
+            // Store conversation and extract memories
+            try {
+                String userMessage = getLastUserMessage(request);
+                Map<String, Object> contextMetadata = Map.of("context_length", context.length(), "model", request.getModel());
+                
+                memoryStorageService.processConversationTurn(
+                    tenantId, sessionId, "default-user", userMessage, assistantResponse, contextMetadata);
+                
+                logger.debug("Successfully processed conversation turn for tenant: {}, session: {}", tenantId, sessionId);
+            } catch (Exception e) {
+                logger.warn("Failed to process conversation turn for tenant: {}, session: {}", tenantId, sessionId, e);
+                // Don't fail the request if memory storage fails
+            }
             
             // Track usage
             trackUsage(tenantId, sessionId, request.getModel(), context.length(), 
@@ -236,6 +272,19 @@ public class ChatController {
             }
         }
         return "Hello"; // Fallback
+    }
+    
+    /**
+     * Extract the assistant's response content from the chat completion response
+     */
+    private String extractAssistantResponse(ChatCompletionResponse response) {
+        if (response.getChoices() != null && !response.getChoices().isEmpty()) {
+            ChatChoice choice = response.getChoices().get(0);
+            if (choice.getMessage() != null) {
+                return choice.getMessage().getContent();
+            }
+        }
+        return "";
     }
     
     /**

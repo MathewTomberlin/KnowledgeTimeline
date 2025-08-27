@@ -59,6 +59,16 @@ public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject
     List<KnowledgeObject> findBySessionIdAndTenantId(String sessionId, String tenantId);
 
     /**
+     * Find knowledge objects by session ID, tenant, and type.
+     *
+     * @param sessionId The session identifier
+     * @param tenantId The tenant identifier
+     * @param type The knowledge object type
+     * @return List of knowledge objects for the session and type
+     */
+    List<KnowledgeObject> findBySessionIdAndTenantIdAndType(String sessionId, String tenantId, KnowledgeObjectType type);
+
+    /**
      * Find knowledge objects by user ID and tenant.
      *
      * @param userId The user identifier
