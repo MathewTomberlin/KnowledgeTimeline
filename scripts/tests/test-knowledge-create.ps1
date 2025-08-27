@@ -41,5 +41,14 @@ try {
 }
 catch {
     Write-Host "FAILED - Error: $($_.Exception.Message)" -ForegroundColor Red
-    return $false
+    if ($_.Exception.Message -match "403") {
+        Write-Host "   Check your API key: $ApiKey" -ForegroundColor Yellow
+    } elseif ($_.Exception.Message -match "Connection") {
+        Write-Host "   Make sure the application is running and accessible at $BaseUrl" -ForegroundColor Yellow
+    } elseif ($_.Exception.Message -match "500") {
+        Write-Host "   Server error occurred. Check application logs for details." -ForegroundColor Yellow
+    }
+    # Return false but don't exit the script
+    $false
+    return
 }

@@ -11,7 +11,12 @@ This directory contains comprehensive test scripts for validating the KnowledgeT
 | **test-chat.ps1** | Test chat completions functionality | ✅ | ✅ |
 | **test-knowledge-create.ps1** | Test knowledge object creation | ✅ | ✅ |
 | **test-embeddings.ps1** | Test embedding generation | ✅ | ✅ |
+| **test-chat-to-knowledge-basic.ps1** | Test basic chat to knowledge object creation | ✅ | ✅ |
+| **test-chat-to-knowledge-memory-extraction.ps1** | Test memory extraction from chat conversations | ✅ | ✅ |
+| **test-embeddings-clean.ps1** | Test embedding generation (clean) | ✅ | ✅ |
+| **test-knowledge-create-clean.ps1** | Test knowledge object creation (clean) | ✅ | ✅ |
 | **run-all-tests.ps1** | Run comprehensive test suite | ✅ | ✅ |
+| **run-all-tests-simple.ps1** | Run simple test suite | ✅ | ✅ |
 
 ## 🚀 Quick Start
 
@@ -134,7 +139,35 @@ This directory contains comprehensive test scripts for validating the KnowledgeT
 .\test-embeddings.ps1 -Text "This is a test sentence for embeddings"
 ```
 
-### 6. Comprehensive Test Suite (`run-all-tests.ps1`)
+### 6. Chat to Knowledge Object Creation (Basic) (`test-chat-to-knowledge-basic.ps1`)
+- **Endpoints**: `POST /v1/chat/completions`, `GET /v1/knowledge/search`
+- **Purpose**: Test integration between chat completions and knowledge object creation
+- **Expected**: HTTP 200 responses, knowledge objects created from chat interactions
+- **Authentication**: Bearer token required
+
+```powershell
+# Basic usage
+.\test-chat-to-knowledge-basic.ps1
+
+# Custom message
+.\test-chat-to-knowledge-basic.ps1 -Message "I am a project manager at Google"
+```
+
+### 7. Memory Extraction from Chat (`test-chat-to-knowledge-memory-extraction.ps1`)
+- **Endpoints**: `POST /v1/chat/completions`, `GET /v1/knowledge/search`
+- **Purpose**: Test memory extraction and fact creation from chat conversations
+- **Expected**: HTTP 200 responses, extracted facts stored as knowledge objects
+- **Authentication**: Bearer token required
+
+```powershell
+# Basic usage
+.\test-chat-to-knowledge-memory-extraction.ps1
+
+# Custom message with extractable facts
+.\test-chat-to-knowledge-memory-extraction.ps1 -Message "My name is Alex, I'm 30, and I work as a data scientist in New York"
+```
+
+### 8. Comprehensive Test Suite (`run-all-tests.ps1`)
 - **Purpose**: Run all tests with summary report
 - **Features**:
   - Sequential test execution
