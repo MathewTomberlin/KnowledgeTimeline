@@ -2,6 +2,8 @@ package middleware.service.impl;
 
 import middleware.service.BlobStorageService;
 import middleware.service.BlobStorageService.BlobMetadata;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -14,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides simulated blob storage functionality using in-memory storage.
  */
 @Service
+@Primary  // This bean takes precedence when multiple BlobStorageService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockBlobStorageService implements BlobStorageService {
 
     private final ConcurrentHashMap<String, String> blobStorage = new ConcurrentHashMap<>();

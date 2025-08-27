@@ -2,6 +2,8 @@ package middleware.service.impl;
 
 import middleware.dto.*;
 import middleware.service.LLMClientService;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
@@ -10,6 +12,8 @@ import java.util.*;
  * Provides simulated responses without requiring actual LLM API access.
  */
 @Service
+@Primary  // This bean takes precedence when multiple LLMClientService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockLLMClientService implements LLMClientService {
     
     private static final List<Model> AVAILABLE_MODELS = Arrays.asList(

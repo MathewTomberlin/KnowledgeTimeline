@@ -7,6 +7,7 @@ import middleware.service.MemoryExtractionService;
 import middleware.service.MemoryExtractionService.*;
 import middleware.service.LLMClientService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * Extracts facts, entities, and tasks from conversations using JSON schema validation.
  */
 @Service
+@Profile({"local", "docker"})  // Only active for production profiles
 public class RealMemoryExtractionService implements MemoryExtractionService {
 
     private static final Logger logger = LoggerFactory.getLogger(RealMemoryExtractionService.class);

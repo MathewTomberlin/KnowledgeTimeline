@@ -2,6 +2,8 @@ package middleware.service.impl;
 
 import middleware.service.MemoryExtractionService;
 import middleware.service.MemoryExtractionService.*;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides simulated memory extraction functionality.
  */
 @Service
+@Primary  // This bean takes precedence when multiple MemoryExtractionService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockMemoryExtractionService implements MemoryExtractionService {
 
     private final ConcurrentHashMap<String, MemoryExtraction> extractions = new ConcurrentHashMap<>();

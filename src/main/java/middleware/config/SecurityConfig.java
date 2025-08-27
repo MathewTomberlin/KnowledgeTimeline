@@ -24,7 +24,7 @@ import java.util.Arrays;
  */
 @Configuration
 @EnableWebSecurity
-@Profile("!test") // Disable security for tests
+@Profile("!test && !integration") // Disable security for tests and integration tests
 public class SecurityConfig {
     
     @Autowired

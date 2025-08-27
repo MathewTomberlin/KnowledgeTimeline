@@ -4,6 +4,7 @@ import middleware.model.UsageLog;
 import middleware.repository.UsageLogRepository;
 import middleware.service.UsageTrackingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  * Provides comprehensive usage tracking, cost estimation, and analytics.
  */
 @Service
+@Profile({"local", "docker"})  // Only active for production profiles
 public class RealUsageTrackingService implements UsageTrackingService {
 
     private static final Logger logger = LoggerFactory.getLogger(RealUsageTrackingService.class);

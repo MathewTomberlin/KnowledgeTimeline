@@ -1,6 +1,8 @@
 package middleware.service.impl;
 
 import middleware.service.VectorStoreService;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
  * Provides simulated vector storage and similarity search without requiring actual vector database.
  */
 @Service
+@Primary  // This bean takes precedence when multiple VectorStoreService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockVectorStoreService implements VectorStoreService {
     
     private final Map<String, StoredEmbedding> embeddings = new ConcurrentHashMap<>();

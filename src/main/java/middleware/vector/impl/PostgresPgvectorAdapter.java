@@ -4,6 +4,7 @@ import middleware.service.VectorStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * Uses pgvector extension for vector similarity search.
  */
 @Service
+@Profile({"local", "docker"})  // Only active for production profiles
 public class PostgresPgvectorAdapter implements VectorStoreService {
     
     private static final Logger logger = LoggerFactory.getLogger(PostgresPgvectorAdapter.class);

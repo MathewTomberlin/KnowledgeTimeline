@@ -10,6 +10,7 @@ import middleware.service.LLMClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * Handles session persistence, summarization, and state management.
  */
 @Service
+@Profile({"local", "docker"})  // Only active for production profiles
 public class RealDialogueStateService implements DialogueStateService {
     
     private static final Logger logger = LoggerFactory.getLogger(RealDialogueStateService.class);

@@ -4,6 +4,7 @@ import middleware.dto.ChatMessage;
 import middleware.service.TokenCountingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Supports multiple models with different tokenization schemes.
  */
 @Service
+@Profile({"local", "docker"})  // Only active for production profiles
 public class RealTokenCountingService implements TokenCountingService {
     
     private static final Logger logger = LoggerFactory.getLogger(RealTokenCountingService.class);

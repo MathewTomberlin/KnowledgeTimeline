@@ -32,7 +32,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Embeddings service - using a simpler approach for now
+  # Embeddings service - using Hugging Face text embeddings inference
   embeddings:
     image: ghcr.io/huggingface/text-embeddings-inference:0.6
     container_name: knowledge-embeddings
@@ -40,10 +40,11 @@ services:
       - MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
       - MAX_INPUT_LENGTH=512
       - MAX_BATCH_SIZE=32
+      - HF_API_TOKEN=${HF_API_TOKEN:-}
     ports:
       - "8081:80"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,8 +59,10 @@ services:
       - ollama_data:/root/.ollama
     profiles:
       - llm
+    environment:
+      - OLLAMA_HOST=0.0.0.0
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:11434/api/tags", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -76,8 +79,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - EMBED_URL=http://embeddings:80/embeddings
-      - LLM_BASE_URL=http://ollama:11434/api
-      - LLM_MODEL=llama2
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LLM_BASE_URL=${LLM_BASE_URL:-http://ollama:11434/api}
+      - LLM_MODEL=${LLM_MODEL:-llama2}
     ports:
       - "8080:8080"
     depends_on:
@@ -90,7 +94,7 @@ services:
     volumes:
       - ./data:/app/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 3

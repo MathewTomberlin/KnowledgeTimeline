@@ -1,6 +1,8 @@
 package middleware.service.impl;
 
 import middleware.service.UsageTrackingService;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides simulated usage tracking functionality.
  */
 @Service
+@Primary  // This bean takes precedence when multiple UsageTrackingService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockUsageTrackingService implements UsageTrackingService {
 
     private final Map<String, Map<String, Long>> tenantUsage = new ConcurrentHashMap<>();

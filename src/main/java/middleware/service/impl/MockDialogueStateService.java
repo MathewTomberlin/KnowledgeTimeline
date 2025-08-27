@@ -2,6 +2,8 @@ package middleware.service.impl;
 
 import middleware.service.DialogueStateService;
 import middleware.service.DialogueStateService.DialogueState;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides simulated dialogue state management functionality.
  */
 @Service
+@Primary  // This bean takes precedence when multiple DialogueStateService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockDialogueStateService implements DialogueStateService {
 
     private final ConcurrentHashMap<String, DialogueState> dialogueStates = new ConcurrentHashMap<>();

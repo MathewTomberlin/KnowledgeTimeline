@@ -2,6 +2,8 @@ package middleware.service.impl;
 
 import middleware.dto.ChatMessage;
 import middleware.service.TokenCountingService;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provides simulated token counting without requiring actual tokenization libraries.
  */
 @Service
+@Primary  // This bean takes precedence when multiple TokenCountingService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockTokenCountingService implements TokenCountingService {
     
     private static final Map<String, Integer> MODEL_MAX_TOKENS = Map.of(

@@ -1,0 +1,59 @@
+spring:
+  datasource:
+    url: ${spring.datasource.url:jdbc:postgresql://localhost:5432/knowledge_middleware_test}
+    username: ${spring.datasource.username:postgres}
+    password: ${spring.datasource.password:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 5
+
+  # Redis temporarily disabled for integration tests
+  # data:
+  #   redis:
+  #     host: ${spring.data.redis.host}
+  #     port: ${spring.data.redis.port}
+
+  flyway:
+    enabled: false  # Disable Flyway for integration tests to avoid migration issues
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Let Hibernate create the schema
+    show-sql: false
+
+  test:
+    webtestclient:
+      timeout: 10s
+
+  autoconfigure:
+    exclude:
+      # Exclude auto-configuration that might interfere with test setup
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+
+# Integration test settings
+knowledge:
+  embeddings:
+    url: http://localhost:8081/embeddings
+    model: sentence-transformers/all-MiniLM-L6-v2
+
+  llm:
+    provider: mock
+    model: gpt-3.5-turbo
+
+  blob-storage:
+    type: local
+    local:
+      path: ./data/test-blobs
+
+  vector-store:
+    type: postgres
+
+logging:
+  level:
+    middleware: DEBUG
+    org.springframework.test: DEBUG
+    org.testcontainers: INFO

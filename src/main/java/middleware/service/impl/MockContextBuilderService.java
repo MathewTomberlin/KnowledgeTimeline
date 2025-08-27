@@ -3,15 +3,18 @@ package middleware.service.impl;
 import middleware.service.ContextBuilderService;
 import middleware.service.VectorStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import middleware.service.ContextBuilderService.KnowledgeObject;
 
 /**
  * Mock implementation of ContextBuilderService for testing and development.
  * Provides simulated context building without requiring actual knowledge retrieval.
  */
 @Service
+@Primary  // This bean takes precedence when multiple ContextBuilderService beans are present
+@Profile({"test", "integration"})  // Only active for test and integration profiles
 public class MockContextBuilderService implements ContextBuilderService {
     
     @Autowired

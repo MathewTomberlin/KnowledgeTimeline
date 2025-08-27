@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/knowledge_middleware
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+  flyway:
+    locations: classpath:db/migration/postgres
+
+# Docker-specific settings
+knowledge:
+  embeddings:
+    url: http://embeddings:80/embeddings
+    model: sentence-transformers/all-MiniLM-L6-v2
+
+  llm:
+    provider: openai
+    api-key: ${OPENAI_API_KEY:}
+    base-url: ${LLM_BASE_URL:http://ollama:11434/api}
+    model: ${LLM_MODEL:llama2}
+
+  blob-storage:
+    type: local
+    local:
+      path: /app/data/blobs
+
+  vector-store:
+    type: postgres
+    postgres:
+      host: postgres
+      port: 5432
+      database: knowledge_middleware
+      username: postgres
+      password: postgres
+
+logging:
+  level:
+    middleware: INFO
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG

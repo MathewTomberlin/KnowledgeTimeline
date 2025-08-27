@@ -19,10 +19,11 @@ public class ApplicationConfig {
 
     /**
      * Configure LLM client service implementation.
-     * Uses OpenAI adapter for local development and testing.
+     * Uses OpenAI adapter for local development and docker deployment.
+     * Note: Integration tests use MockLLMClientService instead.
      */
     @Bean
-    @Profile({"local", "test", "docker"})
+    @Profile({"local", "docker"})  // Removed "test" to avoid conflict with MockLLMClientService
     public LLMClientService llmClientService(@Value("${knowledge.llm.api-key:}") String apiKey,
                                             @Value("${knowledge.llm.base-url:https://api.openai.com/v1}") String baseUrl) {
         return new OpenAIAdapter(apiKey, baseUrl);
@@ -59,14 +60,11 @@ public class ApplicationConfig {
         return new LocalDiskBlobStorage();
     }
 
-    /**
-     * Configure data source for database connections.
-     * Profile-specific configuration handled in application-*.yml files.
-     */
-    @Bean
-    public DataSource dataSource() {
-        // Data source configuration is handled by Spring Boot's auto-configuration
-        // based on application-*.yml profiles
-        return null; // Spring Boot will create the appropriate DataSource
-    }
+    // TODO: Add production and GCP profile configurations for:
+    // - OracleVectorAdapter for production vector storage
+    // - OCIObjectStorage for production blob storage
+    // - RemoteEmbeddings service for cloud deployments
+
+    // Note: DataSource is handled by Spring Boot's auto-configuration
+    // based on application-*.yml profile-specific database settings
 }
