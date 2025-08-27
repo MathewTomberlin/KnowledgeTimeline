@@ -8,40 +8,30 @@ spring:
       connection-timeout: 20000
       maximum-pool-size: 5
 
-  # Redis temporarily disabled for integration tests
-  # data:
-  #   redis:
-  #     host: ${spring.data.redis.host}
-  #     port: ${spring.data.redis.port}
-
   flyway:
-    enabled: false  # Disable Flyway for integration tests to avoid migration issues
+    enabled: false  # Disable Flyway for integration tests
 
   jpa:
     hibernate:
       ddl-auto: create-drop  # Let Hibernate create the schema
-    show-sql: false
 
   test:
     webtestclient:
-      timeout: 10s
+      timeout: 30s  # Longer timeout for real LLM calls
 
   autoconfigure:
     exclude:
-      # Exclude auto-configuration that might interfere with test setup
+      # Exclude security for testing
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
-      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
 
-# Integration test settings
+# Real service integration test settings
 knowledge:
   embeddings:
     url: http://localhost:8081/embeddings
     model: sentence-transformers/all-MiniLM-L6-v2
 
   llm:
-    provider: ollama
     base-url: http://localhost:11434
     model: llama2
 
@@ -56,5 +46,5 @@ knowledge:
 logging:
   level:
     middleware: DEBUG
-    org.springframework.test: DEBUG
-    org.testcontainers: INFO
+    org.springframework.web: DEBUG
+    org.springframework.test: INFO

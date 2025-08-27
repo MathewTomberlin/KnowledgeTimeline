@@ -19,13 +19,23 @@ public class ApplicationConfig {
 
     /**
      * Configure LLM client service implementation.
-     * Uses OpenAI adapter for local development and docker deployment.
-     * Note: Integration tests use MockLLMClientService instead.
+     * Uses OpenAI adapter for production, Ollama adapter for local/docker development.
+     * Note: Integration tests use MockLLMClientService for isolated testing.
      */
     @Bean
-    @Profile({"local", "docker"})  // Removed "test" to avoid conflict with MockLLMClientService
-    public LLMClientService llmClientService(@Value("${knowledge.llm.api-key:}") String apiKey,
-                                            @Value("${knowledge.llm.base-url:https://api.openai.com/v1}") String baseUrl) {
+    @Profile({"local", "docker", "integration-real"})  // Include integration-real for real LLM testing
+    public LLMClientService llmClientService(@Value("${knowledge.llm.base-url:http://localhost:11434}") String baseUrl,
+                                            @Value("${knowledge.llm.model:llama2}") String model) {
+        return new OllamaAdapter(baseUrl, model);
+    }
+
+    /**
+     * Configure OpenAI LLM client service implementation for production use.
+     */
+    @Bean
+    @Profile({"production", "gcp"})  // Cloud/production profiles use OpenAI
+    public LLMClientService openAILLMClientService(@Value("${knowledge.llm.api-key:}") String apiKey,
+                                                  @Value("${knowledge.llm.base-url:https://api.openai.com/v1}") String baseUrl) {
         return new OpenAIAdapter(apiKey, baseUrl);
     }
 
