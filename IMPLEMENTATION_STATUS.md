@@ -483,6 +483,48 @@ docker-compose up -d
 ./mvnw test
 ```
 
+## 🛠️ Development Scripts and Tools
+
+### Core Management Scripts ✅
+- **`start-app.ps1`** / **`start-app.bat`** - Start all services with proper dependency management
+- **`stop-app.ps1`** / **`stop-app.bat`** - Stop all services gracefully
+- **`status.ps1`** / **`status.bat`** - Display current status of all services
+- **`logs.ps1`** / **`logs.bat`** - View logs for specific services
+- **`db-reset.ps1`** / **`db-reset.bat`** - Reset database and run fresh migrations
+
+### Script Features
+- **Dual Interface**: Both PowerShell (.ps1) and Command Prompt (.bat) versions available
+- **Service Integration**: Proper startup order (PostgreSQL → Redis → Ollama → Middleware)
+- **Health Monitoring**: Real-time service health checks with detailed status reporting
+- **Log Management**: Comprehensive log viewing with filtering and real-time following
+- **Database Management**: Complete database reset with migration and test data options
+- **Error Handling**: Robust error handling with clear status messages
+- **Parameter Support**: Full parameter passing for advanced usage scenarios
+
+### Script Status
+| Script | PowerShell | Batch | Status | Features |
+|--------|------------|-------|--------|----------|
+| **start-app** | ✅ | ✅ | Complete | Service startup, health checks, dependency management |
+| **stop-app** | ✅ | ✅ | Complete | Graceful shutdown, container cleanup |
+| **status** | ✅ | ✅ | Complete | Service status, health monitoring |
+| **logs** | ✅ | ✅ | Complete | Log viewing, filtering, real-time following |
+| **db-reset** | ✅ | ✅ | Complete | Database reset, migrations, test data |
+
+### Usage Examples
+```bash
+# Start application
+.\scripts\start-app.bat
+
+# Check status
+.\scripts\status.bat
+
+# View logs
+.\scripts\logs.bat -Service middleware
+
+# Reset database
+.\scripts\db-reset.bat -Confirm
+```
+
 ## 📈 Success Criteria
 
 ### Phase 1: Foundation ✅

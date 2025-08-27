@@ -44,13 +44,14 @@ cd KnowledgeTimeline
 ### 2. Start Local Development Environment
 
 ```bash
-# Start all services (PostgreSQL, Redis, Embeddings, Ollama)
+# Option 1: Use convenience scripts (recommended)
+.\scripts\start-app.bat
+
+# Option 2: Manual Docker Compose
 docker-compose up -d
 
 # Verify services are running
-docker exec knowledge-postgres pg_isready -U postgres -d knowledge_middleware
-docker exec knowledge-redis redis-cli ping
-curl -f http://localhost:8081/health
+.\scripts\status.bat
 ```
 
 ### 3. Run the Application
@@ -80,7 +81,38 @@ curl -X POST http://localhost:8080/v1/chat/completions \
     "model": "gpt-3.5-turbo",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'
+
+# Or use the test script
+.\scripts\test-api.ps1
 ```
+
+## 🛠️ Development Scripts
+
+The project includes comprehensive PowerShell and batch scripts for easy development and management:
+
+### Core Scripts
+- **`start-app.bat`** / **`start-app.ps1`** - Start all services with proper dependency management
+- **`stop-app.bat`** / **`stop-app.ps1`** - Stop all services gracefully  
+- **`status.bat`** / **`status.ps1`** - Display current status of all services
+- **`logs.bat`** / **`logs.ps1`** - View logs for specific services
+- **`db-reset.bat`** / **`db-reset.ps1`** - Reset database and run fresh migrations
+
+### Usage Examples
+```bash
+# Start application
+.\scripts\start-app.bat
+
+# Check status
+.\scripts\status.bat
+
+# View logs
+.\scripts\logs.bat -Service middleware
+
+# Reset database
+.\scripts\db-reset.bat -Confirm
+```
+
+For detailed script documentation, see [scripts/README.md](scripts/README.md).
 
 ## 🏗️ Architecture
 
