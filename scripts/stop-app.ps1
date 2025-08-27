@@ -49,12 +49,7 @@ param(
     [switch]$RemoveVolumes
 )
 
-# Function to keep window open on error
-function Wait-ForUserInput {
-    param([string]$Message = "Press any key to continue...")
-    Write-Host $Message -ForegroundColor Yellow
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-}
+
 
 # Import common functions
 try {
@@ -62,11 +57,10 @@ try {
 } catch {
     Write-Host "Failed to import common functions: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "   Make sure you're running this script from the project root directory" -ForegroundColor Yellow
-    Wait-ForUserInput "Press any key to exit..."
     exit 1
 }
 
-# Wrap the entire script in a try-catch to keep window open on any error
+# Wrap the entire script in a try-catch for error handling
 try {
     Write-Host "Stopping Knowledge-Aware LLM Middleware Application" -ForegroundColor Red
     Write-Host "=========================================================" -ForegroundColor Red
@@ -179,10 +173,8 @@ Write-Host "   Start application: .\scripts\start-app.ps1" -ForegroundColor Whit
 Write-Host "   Check status: .\scripts\status.ps1" -ForegroundColor White
 Write-Host "   View logs: .\scripts\logs.ps1" -ForegroundColor White
 
-# Keep window open
-Wait-ForUserInput "Press any key to exit..."
+
 } catch {
     Write-Host "`nAn unexpected error occurred: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "   Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
-    Wait-ForUserInput "Press any key to exit..."
 }

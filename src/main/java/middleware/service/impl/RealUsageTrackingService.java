@@ -55,6 +55,7 @@ public class RealUsageTrackingService implements UsageTrackingService {
         try {
             // Create usage log entry
             UsageLog usageLog = new UsageLog();
+            usageLog.setId(java.util.UUID.randomUUID().toString());
             usageLog.setTenantId(tenantId);
             usageLog.setUserId(userId);
             usageLog.setSessionId(sessionId);
@@ -65,7 +66,7 @@ public class RealUsageTrackingService implements UsageTrackingService {
             usageLog.setKnowledgeTokensUsed(knowledgeTokens);
             usageLog.setCostEstimate(BigDecimal.valueOf(costEstimate));
             usageLog.setTimestamp(LocalDateTime.now());
-            
+
             // Save to database
             usageLogRepository.save(usageLog);
             

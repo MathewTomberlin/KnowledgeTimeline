@@ -2,14 +2,12 @@ package middleware.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "knowledge_objects")
 public class KnowledgeObject {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     
     @Column(name = "tenant_id", nullable = false)
@@ -59,10 +57,10 @@ public class KnowledgeObject {
     }
     
     // Getters and Setters
-    public String getId() {
+        public String getId() {
         return id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }

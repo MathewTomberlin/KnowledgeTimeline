@@ -2,15 +2,13 @@ package middleware.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "content_variants")
 public class ContentVariant {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
     
     @Column(name = "knowledge_object_id", nullable = false)
     private String knowledgeObjectId;
@@ -49,18 +47,18 @@ public class ContentVariant {
     }
     
     // Getters and Setters
-    public UUID getId() {
+    public String getId() {
         return id;
     }
-    
-    public void setId(UUID id) {
+
+    public void setId(String id) {
         this.id = id;
     }
     
-    public String getKnowledgeObjectId() {
+        public String getKnowledgeObjectId() {
         return knowledgeObjectId;
     }
-    
+
     public void setKnowledgeObjectId(String knowledgeObjectId) {
         this.knowledgeObjectId = knowledgeObjectId;
     }

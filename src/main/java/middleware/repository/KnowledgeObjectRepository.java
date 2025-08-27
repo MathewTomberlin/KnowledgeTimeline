@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for KnowledgeObject entity operations.
@@ -135,5 +134,5 @@ public interface KnowledgeObjectRepository extends JpaRepository<KnowledgeObject
      * @return List of knowledge objects
      */
     @Query("SELECT ko FROM KnowledgeObject ko WHERE ko.id IN :ids AND ko.tenantId = :tenantId")
-    List<KnowledgeObject> findByIdInAndTenantId(@Param("ids") List<UUID> ids, @Param("tenantId") String tenantId);
+    List<KnowledgeObject> findByIdInAndTenantId(@Param("ids") List<String> ids, @Param("tenantId") String tenantId);
 }

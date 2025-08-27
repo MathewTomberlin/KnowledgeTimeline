@@ -2,19 +2,17 @@ package middleware.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "knowledge_relationships")
 public class KnowledgeRelationship {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
     
-    @Column(name = "source_id", nullable = false)
+        @Column(name = "source_id", nullable = false)
     private String sourceId;
-    
+
     @Column(name = "target_id", nullable = false)
     private String targetId;
     
@@ -49,26 +47,26 @@ public class KnowledgeRelationship {
     }
     
     // Getters and Setters
-    public UUID getId() {
+    public String getId() {
         return id;
     }
-    
-    public void setId(UUID id) {
+
+    public void setId(String id) {
         this.id = id;
     }
     
-    public String getSourceId() {
+        public String getSourceId() {
         return sourceId;
     }
-    
+
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
-    
+
     public String getTargetId() {
         return targetId;
     }
-    
+
     public void setTargetId(String targetId) {
         this.targetId = targetId;
     }

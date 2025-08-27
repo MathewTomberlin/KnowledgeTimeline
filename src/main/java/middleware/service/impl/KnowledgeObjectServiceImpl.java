@@ -11,6 +11,7 @@ import middleware.repository.ContentVariantRepository;
 import middleware.service.KnowledgeObjectService;
 import middleware.service.EmbeddingService;
 import middleware.service.TokenCountingService;
+import middleware.service.VectorStoreService;
 import middleware.service.MemoryExtractionService.MemoryExtraction;
 import middleware.service.MemoryExtractionService.Fact;
 import middleware.service.MemoryExtractionService.Entity;
@@ -39,27 +40,30 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
     private final ContentVariantRepository contentVariantRepository;
     private final EmbeddingService embeddingService;
     private final TokenCountingService tokenCountingService;
+    private final VectorStoreService vectorStoreService;
     private final ObjectMapper objectMapper;
-    
+
     @Autowired
     public KnowledgeObjectServiceImpl(KnowledgeObjectRepository knowledgeObjectRepository,
                                    ContentVariantRepository contentVariantRepository,
                                    EmbeddingService embeddingService,
-                                   TokenCountingService tokenCountingService) {
+                                   TokenCountingService tokenCountingService,
+                                   VectorStoreService vectorStoreService) {
         this.knowledgeObjectRepository = knowledgeObjectRepository;
         this.contentVariantRepository = contentVariantRepository;
         this.embeddingService = embeddingService;
         this.tokenCountingService = tokenCountingService;
+        this.vectorStoreService = vectorStoreService;
         this.objectMapper = new ObjectMapper();
     }
     
     @Override
-    @Transactional
-    public KnowledgeObject createUserTurn(String tenantId, String sessionId, String userId, 
+    public KnowledgeObject createUserTurn(String tenantId, String sessionId, String userId,
                                         String userMessage, Map<String, Object> metadata) {
         logger.debug("Creating user turn knowledge object for session: {}, user: {}", sessionId, userId);
-        
+
         KnowledgeObject knowledgeObject = new KnowledgeObject();
+        knowledgeObject.setId(UUID.randomUUID().toString());
         knowledgeObject.setTenantId(tenantId);
         knowledgeObject.setType(KnowledgeObjectType.TURN);
         knowledgeObject.setSessionId(sessionId);
@@ -75,12 +79,12 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
     }
     
     @Override
-    @Transactional
-    public KnowledgeObject createAssistantTurn(String tenantId, String sessionId, String userId, 
+    public KnowledgeObject createAssistantTurn(String tenantId, String sessionId, String userId,
                                             String assistantMessage, Map<String, Object> metadata) {
         logger.debug("Creating assistant turn knowledge object for session: {}, user: {}", sessionId, userId);
-        
+
         KnowledgeObject knowledgeObject = new KnowledgeObject();
+        knowledgeObject.setId(UUID.randomUUID().toString());
         knowledgeObject.setTenantId(tenantId);
         knowledgeObject.setType(KnowledgeObjectType.TURN);
         knowledgeObject.setSessionId(sessionId);
@@ -96,8 +100,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
     }
     
     @Override
-    @Transactional
-    public List<KnowledgeObject> createExtractedFacts(String tenantId, String sessionId, String userId, 
+    public List<KnowledgeObject> createExtractedFacts(String tenantId, String sessionId, String userId,
                                                     MemoryExtraction memoryExtraction) {
         logger.debug("Creating extracted fact knowledge objects for session: {}, user: {}", sessionId, userId);
         
@@ -107,6 +110,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         if (memoryExtraction.getFacts() != null) {
             for (Fact fact : memoryExtraction.getFacts()) {
                 KnowledgeObject factObject = new KnowledgeObject();
+                factObject.setId(UUID.randomUUID().toString());
                 factObject.setTenantId(tenantId);
                 factObject.setType(KnowledgeObjectType.EXTRACTED_FACT);
                 factObject.setSessionId(sessionId);
@@ -133,6 +137,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         if (memoryExtraction.getEntities() != null) {
             for (Entity entity : memoryExtraction.getEntities()) {
                 KnowledgeObject entityObject = new KnowledgeObject();
+                entityObject.setId(UUID.randomUUID().toString());
                 entityObject.setTenantId(tenantId);
                 entityObject.setType(KnowledgeObjectType.EXTRACTED_FACT);
                 entityObject.setSessionId(sessionId);
@@ -161,6 +166,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         if (memoryExtraction.getTasks() != null) {
             for (Task task : memoryExtraction.getTasks()) {
                 KnowledgeObject taskObject = new KnowledgeObject();
+                taskObject.setId(UUID.randomUUID().toString());
                 taskObject.setTenantId(tenantId);
                 taskObject.setType(KnowledgeObjectType.EXTRACTED_FACT);
                 taskObject.setSessionId(sessionId);
@@ -188,12 +194,12 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
     }
     
     @Override
-    @Transactional
-    public KnowledgeObject createSessionMemory(String tenantId, String sessionId, String userId, 
+    public KnowledgeObject createSessionMemory(String tenantId, String sessionId, String userId,
                                             String summary, Map<String, Object> metadata) {
         logger.debug("Creating session memory knowledge object for session: {}, user: {}", sessionId, userId);
         
         KnowledgeObject knowledgeObject = new KnowledgeObject();
+        knowledgeObject.setId(UUID.randomUUID().toString());
         knowledgeObject.setTenantId(tenantId);
         knowledgeObject.setType(KnowledgeObjectType.SESSION_MEMORY);
         knowledgeObject.setSessionId(sessionId);
@@ -220,6 +226,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         // Create RAW variant
         if (rawContent != null && !rawContent.trim().isEmpty()) {
             ContentVariant rawVariant = new ContentVariant();
+            rawVariant.setId(UUID.randomUUID().toString());
             rawVariant.setKnowledgeObjectId(knowledgeObject.getId());
             rawVariant.setVariant(ContentVariantType.RAW);
             rawVariant.setContent(rawContent);
@@ -231,6 +238,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         // Create SHORT variant
         if (shortContent != null && !shortContent.trim().isEmpty()) {
             ContentVariant shortVariant = new ContentVariant();
+            shortVariant.setId(UUID.randomUUID().toString());
             shortVariant.setKnowledgeObjectId(knowledgeObject.getId());
             shortVariant.setVariant(ContentVariantType.SHORT);
             shortVariant.setContent(shortContent);
@@ -242,6 +250,7 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         // Create BULLET_FACTS variant
         if (bulletFacts != null && !bulletFacts.trim().isEmpty()) {
             ContentVariant bulletVariant = new ContentVariant();
+            bulletVariant.setId(UUID.randomUUID().toString());
             bulletVariant.setKnowledgeObjectId(knowledgeObject.getId());
             bulletVariant.setVariant(ContentVariantType.BULLET_FACTS);
             bulletVariant.setContent(bulletFacts);
@@ -254,24 +263,47 @@ public class KnowledgeObjectServiceImpl implements KnowledgeObjectService {
         return variants;
     }
     
-    @Override
+        @Override
     @Transactional
-    public KnowledgeObject storeKnowledgeObject(KnowledgeObject knowledgeObject, 
+    public KnowledgeObject storeKnowledgeObject(KnowledgeObject knowledgeObject,
                                               List<ContentVariant> contentVariants) {
-        logger.debug("Storing knowledge object with {} content variants", contentVariants.size());
-        
-        // Save the knowledge object first
-        KnowledgeObject savedKnowledgeObject = knowledgeObjectRepository.save(knowledgeObject);
-        
-        // Save content variants
+        logger.debug("Storing knowledge object with {} content variants. Object ID: {}", contentVariants.size(), knowledgeObject.getId());
+
+        // Ensure all content variants have the correct KnowledgeObject ID (foreign key)
         for (ContentVariant variant : contentVariants) {
-            variant.setKnowledgeObjectId(savedKnowledgeObject.getId());
-            contentVariantRepository.save(variant);
+            variant.setKnowledgeObjectId(knowledgeObject.getId());
         }
-        
-        logger.debug("Successfully stored knowledge object: {} with {} content variants", 
+
+        // Save the knowledge object first
+        logger.debug("About to save KnowledgeObject with ID: {}", knowledgeObject.getId());
+        KnowledgeObject savedKnowledgeObject = knowledgeObjectRepository.save(knowledgeObject);
+        logger.debug("Successfully saved KnowledgeObject with ID: {}", savedKnowledgeObject.getId());
+
+        // Save content variants and generate embeddings
+        for (ContentVariant variant : contentVariants) {
+            ContentVariant savedVariant = contentVariantRepository.save(variant);
+
+            // Generate and store embedding for the variant if it has content
+            if (variant.getContent() != null && !variant.getContent().trim().isEmpty()) {
+                try {
+                    List<Float> embedding = embeddingService.generateEmbedding(variant.getContent());
+                    vectorStoreService.storeEmbedding(
+                        savedKnowledgeObject.getId().toString(),
+                        savedVariant.getId().toString(),
+                        variant.getContent(),
+                        embedding
+                    );
+                    logger.debug("Generated and stored embedding for variant: {}", savedVariant.getId());
+                } catch (Exception e) {
+                    logger.error("Failed to generate embedding for variant: {}", savedVariant.getId(), e);
+                    // Continue without failing the entire operation
+                }
+            }
+        }
+
+        logger.debug("Successfully stored knowledge object: {} with {} content variants",
                     savedKnowledgeObject.getId(), contentVariants.size());
-        
+
         return savedKnowledgeObject;
     }
     

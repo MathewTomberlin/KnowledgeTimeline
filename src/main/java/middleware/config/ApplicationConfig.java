@@ -55,9 +55,9 @@ public class ApplicationConfig {
      */
     @Bean
     @Profile({"local", "test", "docker"})
-    public VectorStoreService vectorStoreService(DataSource dataSource,
+    public VectorStoreService vectorStoreService(DataSource dataSource, EmbeddingService embeddingService,
                                                @Value("${knowledge.embeddings.dimension:384}") int embeddingDimension) {
-        return new PostgresPgvectorAdapter(dataSource);
+        return new PostgresPgvectorAdapter(dataSource, embeddingService, embeddingDimension);
     }
 
     /**

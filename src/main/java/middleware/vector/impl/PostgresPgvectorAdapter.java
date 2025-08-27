@@ -1,6 +1,7 @@
 package middleware.vector.impl;
 
 import middleware.service.VectorStoreService;
+import middleware.service.EmbeddingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,46 +24,49 @@ import java.util.stream.Collectors;
 @Service
 @Profile({"local", "docker"})  // Only active for production profiles
 public class PostgresPgvectorAdapter implements VectorStoreService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(PostgresPgvectorAdapter.class);
-    
+
     private final JdbcTemplate jdbcTemplate;
+    private final EmbeddingService embeddingService;
     private final int embeddingDimension;
-    
-    @Value("${vector.store.embedding-dimension:384}")
-    private int configEmbeddingDimension;
-    
-    public PostgresPgvectorAdapter(DataSource dataSource) {
+
+    public PostgresPgvectorAdapter(DataSource dataSource, EmbeddingService embeddingService,
+                                 @Value("${vector.store.embedding-dimension:384}") int embeddingDimension) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.embeddingDimension = configEmbeddingDimension;
+        this.embeddingService = embeddingService;
+        this.embeddingDimension = embeddingDimension;
         initializeDatabase();
     }
     
     @Override
     public String storeEmbedding(String objectId, String variantId, String text, List<Float> embedding) {
         try {
-            // Convert List<Float> to array for PostgreSQL
-            float[] embeddingArray = new float[embedding.size()];
+            // Convert List<Float> to vector string format for PostgreSQL
+            StringBuilder sb = new StringBuilder("[");
             for (int i = 0; i < embedding.size(); i++) {
-                embeddingArray[i] = embedding.get(i);
+                if (i > 0) sb.append(",");
+                sb.append(embedding.get(i));
             }
-            
+            sb.append("]");
+            String vectorString = sb.toString();
+
             String sql = """
                 INSERT INTO embeddings (id, variant_id, text_snippet, embedding, created_at)
-                VALUES (?, ?, ?, ?, NOW())
+                VALUES (?, ?, ?, ?::vector, NOW())
                 ON CONFLICT (variant_id) DO UPDATE SET
                     text_snippet = EXCLUDED.text_snippet,
                     embedding = EXCLUDED.embedding,
                     updated_at = NOW()
                 RETURNING id
                 """;
-            
+
             String embeddingId = jdbcTemplate.queryForObject(sql, String.class,
-                UUID.randomUUID().toString(), variantId, text, embeddingArray);
-            
+                UUID.randomUUID().toString(), variantId, text, vectorString);
+
             logger.debug("Stored embedding for variant {} with ID {}", variantId, embeddingId);
             return embeddingId;
-            
+
         } catch (Exception e) {
             logger.error("Failed to store embedding for variant {}", variantId, e);
             throw new RuntimeException("Failed to store embedding", e);
@@ -75,18 +79,27 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
         try {
             // For now, implement basic cosine similarity search
             // TODO: Implement MMR algorithm for diversity
-            String sql = """
-                SELECT e.id, e.variant_id, e.text_snippet, e.embedding,
-                       cv.knowledge_object_id, cv.content, cv.metadata,
-                       (e.embedding <=> ?) as similarity_score
-                FROM embeddings e
-                JOIN content_variants cv ON e.variant_id = cv.id
-                JOIN knowledge_objects ko ON cv.knowledge_object_id = ko.id
-                WHERE ko.archived = false
-                """;
-            
             List<Object> params = new ArrayList<>();
-            params.add(convertTextToEmbedding(queryText)); // This would need an embedding service
+            float[] queryEmbedding = convertTextToEmbedding(queryText);
+            // Convert to vector string format
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < queryEmbedding.length; i++) {
+                if (i > 0) sb.append(",");
+                sb.append(queryEmbedding[i]);
+            }
+            sb.append("]");
+            String vectorString = sb.toString();
+
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append("SELECT e.id, e.variant_id, e.text_snippet, e.embedding, ");
+            sqlBuilder.append("cv.knowledge_object_id, cv.content, ko.metadata, ");
+            sqlBuilder.append("(e.embedding <=> '").append(vectorString).append("') as similarity_score ");
+            sqlBuilder.append("FROM embeddings e ");
+            sqlBuilder.append("JOIN content_variants cv ON e.variant_id = cv.id ");
+            sqlBuilder.append("JOIN knowledge_objects ko ON cv.knowledge_object_id = ko.id ");
+            sqlBuilder.append("WHERE ko.archived = false");
+
+            String sql = sqlBuilder.toString();
             
             // Add filters
             if (filters != null) {
@@ -132,14 +145,36 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
     @Override
     public boolean isHealthy() {
         try {
+            // Check if we can connect to the database
+            String sql = "SELECT 1";
+            jdbcTemplate.queryForObject(sql, Integer.class);
+
             // Check if pgvector extension is available
-            String sql = "SELECT 1 FROM pg_extension WHERE extname = 'vector'";
-            jdbcTemplate.queryForObject(sql, Integer.class);
-            
-            // Check if embeddings table exists and is accessible
-            sql = "SELECT COUNT(*) FROM embeddings LIMIT 1";
-            jdbcTemplate.queryForObject(sql, Integer.class);
-            
+            try {
+                sql = "SELECT 1 FROM pg_extension WHERE extname = 'vector'";
+                jdbcTemplate.queryForObject(sql, Integer.class);
+            } catch (Exception e) {
+                logger.warn("pgvector extension not available", e);
+                return false;
+            }
+
+            // Try to check if embeddings table exists and is accessible
+            try {
+                sql = "SELECT COUNT(*) FROM embeddings LIMIT 1";
+                jdbcTemplate.queryForObject(sql, Integer.class);
+            } catch (Exception e) {
+                logger.warn("embeddings table not accessible, may need initialization", e);
+                // Try to initialize and then check again
+                try {
+                    initializeDatabase();
+                    sql = "SELECT COUNT(*) FROM embeddings LIMIT 1";
+                    jdbcTemplate.queryForObject(sql, Integer.class);
+                } catch (Exception initException) {
+                    logger.error("Failed to initialize and access embeddings table", initException);
+                    return false;
+                }
+            }
+
             return true;
         } catch (Exception e) {
             logger.error("Health check failed for PostgresPgvectorAdapter", e);
@@ -154,6 +189,15 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
     
     private void initializeDatabase() {
         try {
+            // Check if pgvector extension exists
+            try {
+                jdbcTemplate.execute("CREATE EXTENSION IF NOT EXISTS vector");
+                logger.info("pgvector extension is available");
+            } catch (Exception e) {
+                logger.warn("pgvector extension not available, vector search will not work", e);
+                return;
+            }
+
             // Create embeddings table if it doesn't exist
             String createTableSql = """
                 CREATE TABLE IF NOT EXISTS embeddings (
@@ -165,19 +209,19 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
                     updated_at TIMESTAMP DEFAULT NOW()
                 )
                 """.formatted(embeddingDimension);
-            
+
             jdbcTemplate.execute(createTableSql);
-            
+
             // Create index for similarity search
             String createIndexSql = """
-                CREATE INDEX IF NOT EXISTS embeddings_ivfflat 
-                ON embeddings USING ivfflat (embedding) WITH (lists = 100)
+                CREATE INDEX IF NOT EXISTS embeddings_ivfflat
+                ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)
                 """;
-            
+
             jdbcTemplate.execute(createIndexSql);
-            
+
             logger.info("Initialized embeddings table with pgvector support");
-            
+
         } catch (Exception e) {
             logger.error("Failed to initialize embeddings table", e);
             throw new RuntimeException("Failed to initialize vector store", e);
@@ -208,13 +252,22 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
     }
     
     private float[] convertTextToEmbedding(String text) {
-        // TODO: This should use an embedding service
-        // For now, return a mock embedding of the correct dimension
-        float[] mockEmbedding = new float[embeddingDimension];
-        Random random = new Random(text.hashCode()); // Deterministic for testing
-        for (int i = 0; i < embeddingDimension; i++) {
-            mockEmbedding[i] = random.nextFloat() * 2 - 1; // Range [-1, 1]
+        try {
+            List<Float> embedding = embeddingService.generateEmbedding(text);
+            float[] embeddingArray = new float[embedding.size()];
+            for (int i = 0; i < embedding.size(); i++) {
+                embeddingArray[i] = embedding.get(i);
+            }
+            return embeddingArray;
+        } catch (Exception e) {
+            logger.error("Failed to generate embedding for text: {}", text, e);
+            // Fallback to mock embedding if embedding service fails
+            float[] mockEmbedding = new float[embeddingDimension];
+            Random random = new Random(text.hashCode()); // Deterministic for testing
+            for (int i = 0; i < embeddingDimension; i++) {
+                mockEmbedding[i] = random.nextFloat() * 2 - 1; // Range [-1, 1]
+            }
+            return mockEmbedding;
         }
-        return mockEmbedding;
     }
 }

@@ -122,13 +122,14 @@ public class ChatController {
                 try {
                     String userMessage = getLastUserMessage(request);
                     Map<String, Object> contextMetadata = Map.of("context_length", context.length(), "model", request.getModel());
-                    
+
+                    logger.info("About to call memory storage service for tenant: {}, session: {}", tenantId, sessionId);
                     memoryStorageService.processConversationTurn(
                         tenantId, sessionId, "default-user", userMessage, response, contextMetadata);
-                    
-                    logger.debug("Successfully processed conversation turn for tenant: {}, session: {}", tenantId, sessionId);
+
+                    logger.info("Successfully processed conversation turn for tenant: {}, session: {}", tenantId, sessionId);
                 } catch (Exception e) {
-                    logger.warn("Failed to process conversation turn for tenant: {}, session: {}", tenantId, sessionId, e);
+                    logger.error("Failed to process conversation turn for tenant: {}, session: {}", tenantId, sessionId, e);
                     // Don't fail the request if memory storage fails
                 }
                 
@@ -183,13 +184,14 @@ public class ChatController {
             try {
                 String userMessage = getLastUserMessage(request);
                 Map<String, Object> contextMetadata = Map.of("context_length", context.length(), "model", request.getModel());
-                
+
+                logger.error("About to call memory storage service for tenant: {}, session: {}", tenantId, sessionId);
                 memoryStorageService.processConversationTurn(
                     tenantId, sessionId, "default-user", userMessage, assistantResponse, contextMetadata);
-                
-                logger.debug("Successfully processed conversation turn for tenant: {}, session: {}", tenantId, sessionId);
+
+                logger.error("Successfully processed conversation turn for tenant: {}, session: {}", tenantId, sessionId);
             } catch (Exception e) {
-                logger.warn("Failed to process conversation turn for tenant: {}, session: {}", tenantId, sessionId, e);
+                logger.error("Failed to process conversation turn for tenant: {}, session: {}", tenantId, sessionId, e);
                 // Don't fail the request if memory storage fails
             }
             

@@ -104,7 +104,7 @@ public class RealContextBuilderService implements ContextBuilderService {
                     }
                     
                     // Get content variant for this object
-                    List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectId(knowledgeObject.getId());
+                    List<ContentVariant> variants = contentVariantRepository.findByKnowledgeObjectId(knowledgeObject.getId().toString());
                     ContentVariant bestVariant = selectBestVariant(variants);
                     
                     // Create DTO KnowledgeObject
@@ -115,7 +115,7 @@ public class RealContextBuilderService implements ContextBuilderService {
                     metadata.put("type", knowledgeObject.getType() != null ? knowledgeObject.getType().toString() : "UNKNOWN");
                     
                     ContextBuilderService.KnowledgeObject dtoObject = new ContextBuilderService.KnowledgeObject(
-                        knowledgeObject.getId(),
+                        knowledgeObject.getId().toString(),
                         knowledgeObject.getType() != null ? knowledgeObject.getType().toString() : "UNKNOWN",
                         "Knowledge Object", // Default title
                         bestVariant != null ? bestVariant.getContent() : "",

@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public class DialogueState {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     
     @Column(name = "tenant_id", nullable = false)

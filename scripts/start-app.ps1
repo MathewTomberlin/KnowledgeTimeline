@@ -8,21 +8,9 @@ param(
     [switch]$Build
 )
 
-function Wait-ForUserInput {
-    param([string]$Message = "Press any key to continue...")
-    Write-Host $Message -ForegroundColor Yellow
-    try {
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    } catch {
-        Write-Host "Press Enter to continue..."
-        Read-Host
-    }
-}
-
 function Safe-Exit {
     param([int]$ExitCode = 0)
     Write-Host "Script completed with exit code: $ExitCode" -ForegroundColor Cyan
-    Wait-ForUserInput "Press any key to exit..."
     exit $ExitCode
 }
 
@@ -110,7 +98,21 @@ try {
         Safe-Exit 1
     }
     Write-Host "Ollama started" -ForegroundColor Green
-    
+
+    # Check if llama2 model is available, if not pull it
+    Write-Host "Checking Ollama model availability..." -ForegroundColor Yellow
+    try {
+        $modelCheck = docker-compose exec -T ollama ollama list 2>$null
+        if ($modelCheck -notmatch "llama2") {
+            Write-Host "Pulling llama2 model (this may take a few minutes)..." -ForegroundColor Yellow
+            docker-compose exec -T ollama ollama pull llama2
+        } else {
+            Write-Host "llama2 model already available" -ForegroundColor Green
+        }
+    } catch {
+        Write-Host "Could not check model status, proceeding..." -ForegroundColor Yellow
+    }
+
     # Wait a moment for Ollama to initialize
     Write-Host "Waiting for Ollama to initialize..." -ForegroundColor Yellow
     Start-Sleep -Seconds 5

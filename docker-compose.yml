@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -23,7 +23,7 @@ services:
     image: redis:7-alpine
     container_name: knowledge-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -73,6 +73,7 @@ services:
     container_name: knowledge-middleware
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING=true
       - DB_URL=jdbc:postgresql://postgres:5432/knowledge_middleware
       - DB_USER=postgres
       - DB_PASSWORD=postgres
@@ -88,8 +89,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      embeddings:
         condition: service_healthy
     volumes:
       - ./data:/app/data

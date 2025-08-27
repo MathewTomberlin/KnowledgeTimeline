@@ -4,12 +4,7 @@
 # Set error action preference
 $ErrorActionPreference = "Continue"
 
-# Function to keep window open on error
-function Wait-ForUserInput {
-    param([string]$Message = "Press any key to continue...")
-    Write-Host $Message -ForegroundColor Yellow
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-}
+
 
 # Color constants for consistent output
 $Colors = @{
@@ -37,8 +32,8 @@ $ServiceConfig = @{
     ollama = @{
         Name = "knowledge-ollama"
         Port = 11434
-        HealthCheck = "ollama list"
-        StartupTime = 45
+        HealthCheck = "wget --no-verbose --tries=1 --spider http://localhost:11434/api/tags"
+        StartupTime = 10
     }
     middleware = @{
         Name = "knowledge-middleware"
@@ -224,7 +219,7 @@ function Wait-ForServicesHealthy {
             $remaining = $Services.Count - $healthyServices.Count
             $elapsedFormatted = [math]::Round($elapsed.TotalSeconds, 0)
             Write-ColorOutput "`n   Waiting for $remaining more service(s)... (elapsed: ${elapsedFormatted}s)" $Colors.Info
-            Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 5
         }
     }
     
@@ -264,6 +259,16 @@ function Test-ServiceHealthy {
             }
         }
         
+        # For Ollama, check the actual API endpoint since port connectivity isn't sufficient
+        if ($ServiceName -eq "ollama") {
+            try {
+                $response = Invoke-WebRequest -Uri "http://localhost:$($config.Port)/api/tags" -UseBasicParsing -TimeoutSec 5 2>$null
+                return $response.StatusCode -eq 200
+            } catch {
+                return $false
+            }
+        }
+
         # For other services, check if they're responding on their port
         try {
             $connection = Test-NetConnection -ComputerName localhost -Port $config.Port -InformationLevel Quiet -WarningAction SilentlyContinue 2>$null

@@ -1,6 +1,7 @@
 package middleware.vector.impl;
 
 import middleware.service.VectorStoreService;
+import middleware.service.EmbeddingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,9 @@ class PostgresPgvectorAdapterTest {
     @Mock
     private DataSource dataSource;
 
+    @Mock
+    private EmbeddingService embeddingService;
+
     private PostgresPgvectorAdapter vectorStoreService;
 
     @BeforeEach
@@ -45,11 +49,7 @@ class PostgresPgvectorAdapterTest {
         // Mock the database initialization to succeed
         when(mockStatement.execute(anyString())).thenReturn(true);
         
-        vectorStoreService = new PostgresPgvectorAdapter(dataSource);
-        
-        // Set the embedding dimension manually since @Value doesn't work in tests
-        ReflectionTestUtils.setField(vectorStoreService, "configEmbeddingDimension", 384);
-        ReflectionTestUtils.setField(vectorStoreService, "embeddingDimension", 384);
+        vectorStoreService = new PostgresPgvectorAdapter(dataSource, embeddingService, 384);
         
         // Mock the JdbcTemplate operations to return appropriate values
         JdbcTemplate mockJdbcTemplate = mock(JdbcTemplate.class);

@@ -102,7 +102,7 @@ public class RelationshipDiscoveryService {
             
             int totalRelationships = 0;
             for (KnowledgeObject object : knowledgeObjects) {
-                totalRelationships += discoverRelationshipsForObject(object.getId(), tenantId);
+                totalRelationships += discoverRelationshipsForObject(object.getId().toString(), tenantId);
             }
             
             return totalRelationships;

@@ -2,14 +2,12 @@ package middleware.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "api_keys")
 public class ApiKey {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     
     @Column(name = "key_hash", unique = true, nullable = false)
@@ -45,10 +43,10 @@ public class ApiKey {
     }
     
     // Getters and Setters
-    public String getId() {
+        public String getId() {
         return id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }

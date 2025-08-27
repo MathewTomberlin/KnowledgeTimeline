@@ -1,6 +1,7 @@
 package middleware.service.impl;
 
 import middleware.model.KnowledgeObject;
+import middleware.model.KnowledgeObjectType;
 import middleware.model.ContentVariant;
 import middleware.service.MemoryStorageService;
 import middleware.service.MemoryExtractionService;
@@ -144,8 +145,10 @@ public class MemoryStorageServiceImpl implements MemoryStorageService {
         
         try {
             // Create user turn knowledge object
-            KnowledgeObject userTurn = knowledgeObjectService.createUserTurn(tenantId, sessionId, userId, 
+            logger.error("Creating user turn knowledge object");
+            KnowledgeObject userTurn = knowledgeObjectService.createUserTurn(tenantId, sessionId, userId,
                                                                           userMessage, metadata);
+            logger.error("Created user turn with ID: {}", userTurn.getId());
             
             // Create content variants for user turn
             List<ContentVariant> userVariants = knowledgeObjectService.createContentVariants(
@@ -153,7 +156,7 @@ public class MemoryStorageServiceImpl implements MemoryStorageService {
             
             // Store user turn
             KnowledgeObject savedUserTurn = knowledgeObjectService.storeKnowledgeObject(userTurn, userVariants);
-            result.put("user_turn_id", savedUserTurn.getId());
+            result.put("user_turn_id", savedUserTurn.getId().toString());
             
             // Create assistant turn knowledge object
             KnowledgeObject assistantTurn = knowledgeObjectService.createAssistantTurn(tenantId, sessionId, userId, 
@@ -165,10 +168,10 @@ public class MemoryStorageServiceImpl implements MemoryStorageService {
             
             // Store assistant turn
             KnowledgeObject savedAssistantTurn = knowledgeObjectService.storeKnowledgeObject(assistantTurn, assistantVariants);
-            result.put("assistant_turn_id", savedAssistantTurn.getId());
+            result.put("assistant_turn_id", savedAssistantTurn.getId().toString());
             
-            logger.debug("Stored conversation turns. User turn: {}, Assistant turn: {}", 
-                        savedUserTurn.getId(), savedAssistantTurn.getId());
+            logger.debug("Stored conversation turns. User turn: {}, Assistant turn: {}",
+                        savedUserTurn.getId().toString(), savedAssistantTurn.getId().toString());
             
         } catch (Exception e) {
             logger.error("Error storing conversation turns for tenant: {}, session: {}", 
@@ -201,7 +204,7 @@ public class MemoryStorageServiceImpl implements MemoryStorageService {
                 
                 // Store the knowledge object
                 KnowledgeObject savedObject = knowledgeObjectService.storeKnowledgeObject(factObject, variants);
-                createdIds.add(savedObject.getId());
+                createdIds.add(savedObject.getId().toString());
             }
             
             logger.debug("Processed memory extraction. Created {} knowledge objects", createdIds.size());
@@ -275,8 +278,8 @@ public class MemoryStorageServiceImpl implements MemoryStorageService {
             // Store session memory
             KnowledgeObject savedSessionMemory = knowledgeObjectService.storeKnowledgeObject(sessionMemory, variants);
             
-            logger.debug("Created session memory: {}", savedSessionMemory.getId());
-            return savedSessionMemory.getId();
+            logger.debug("Created session memory: {}", savedSessionMemory.getId().toString());
+            return savedSessionMemory.getId().toString();
             
         } catch (Exception e) {
             logger.error("Error creating session memory for tenant: {}, session: {}", 
@@ -289,8 +292,31 @@ public class MemoryStorageServiceImpl implements MemoryStorageService {
      * Extract content from a fact knowledge object for content variant creation.
      */
     private String extractContentFromFact(KnowledgeObject factObject) {
-        // For now, we'll use a placeholder since the actual content structure
-        // depends on how facts are stored. This can be enhanced later.
-        return "Extracted fact content";
+        // For extracted facts, the content is stored in the metadata
+        // We'll create a summary from the metadata for now
+        StringBuilder content = new StringBuilder();
+
+        if (factObject.getType() == KnowledgeObjectType.EXTRACTED_FACT) {
+            // Try to extract content from metadata
+            try {
+                String metadata = factObject.getMetadata();
+                if (metadata != null && !metadata.equals("{}")) {
+                    // Simple extraction - look for source information
+                    if (metadata.contains("conversation")) {
+                        content.append("Extracted fact from conversation");
+                    } else {
+                        content.append("Extracted fact");
+                    }
+                }
+            } catch (Exception e) {
+                logger.debug("Could not extract content from fact metadata", e);
+            }
+        }
+
+        if (content.length() == 0) {
+            content.append("Extracted fact content");
+        }
+
+        return content.toString();
     }
 }

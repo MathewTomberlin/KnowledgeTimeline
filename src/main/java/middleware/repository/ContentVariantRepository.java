@@ -9,14 +9,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Repository interface for ContentVariant entity operations.
  * Provides data access methods for content variant management.
  */
 @Repository
-public interface ContentVariantRepository extends JpaRepository<ContentVariant, UUID> {
+public interface ContentVariantRepository extends JpaRepository<ContentVariant, String> {
 
     /**
      * Find a content variant by its ID.
@@ -24,7 +23,7 @@ public interface ContentVariantRepository extends JpaRepository<ContentVariant, 
      * @param id The content variant ID
      * @return Optional containing the content variant if found
      */
-    Optional<ContentVariant> findById(UUID id);
+    Optional<ContentVariant> findById(String id);
 
     /**
      * Find all content variants for a knowledge object.

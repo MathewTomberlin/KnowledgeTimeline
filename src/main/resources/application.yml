@@ -45,7 +45,7 @@ management:
 
 logging:
   level:
-    middleware: INFO
+    middleware: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
   pattern:

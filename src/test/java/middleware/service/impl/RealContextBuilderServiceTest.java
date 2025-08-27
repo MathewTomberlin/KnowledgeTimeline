@@ -164,7 +164,7 @@ class RealContextBuilderServiceTest {
 
     private ContentVariant createContentVariant(String id, String knowledgeObjectId, String variant, String content) {
         ContentVariant variantObj = new ContentVariant();
-        variantObj.setId(UUID.randomUUID());
+        variantObj.setId(UUID.randomUUID().toString());
         variantObj.setKnowledgeObjectId(knowledgeObjectId);
         variantObj.setVariant(middleware.model.ContentVariantType.valueOf(variant));
         variantObj.setContent(content);
