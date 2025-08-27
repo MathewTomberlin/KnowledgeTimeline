@@ -53,8 +53,8 @@ class RealContextBuilderServiceTest {
         knowledgeContext.put("diversity", 0.3);
 
         // Mock vector search results
-        VectorStoreService.SimilarityMatch match1 = new VectorStoreService.SimilarityMatch("obj1", "var1", "content1", 0.9, new HashMap<>());
-        VectorStoreService.SimilarityMatch match2 = new VectorStoreService.SimilarityMatch("obj2", "var2", "content2", 0.8, new HashMap<>());
+        VectorStoreService.SimilarityMatch match1 = new VectorStoreService.SimilarityMatch("obj1", "var1", 0.9, "content1", new HashMap<>());
+        VectorStoreService.SimilarityMatch match2 = new VectorStoreService.SimilarityMatch("obj2", "var2", 0.8, "content2", new HashMap<>());
         List<VectorStoreService.SimilarityMatch> matches = Arrays.asList(match1, match2);
 
         when(vectorStoreService.findSimilar(anyString(), eq(20), isNull(), eq(true), eq(0.3)))
@@ -119,7 +119,7 @@ class RealContextBuilderServiceTest {
         Map<String, Object> filters = new HashMap<>();
 
         // Mock vector search results
-        VectorStoreService.SimilarityMatch match1 = new VectorStoreService.SimilarityMatch("obj1", "var1", "content1", 0.9, new HashMap<>());
+        VectorStoreService.SimilarityMatch match1 = new VectorStoreService.SimilarityMatch("obj1", "var1", 0.9, "content1", new HashMap<>());
         List<VectorStoreService.SimilarityMatch> matches = Arrays.asList(match1);
 
         when(vectorStoreService.findSimilar(query, maxResults, filters, true, 0.3))

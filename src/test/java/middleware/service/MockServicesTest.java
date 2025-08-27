@@ -120,10 +120,7 @@ public class MockServicesTest {
         // Test service health
         assertTrue(vectorStoreService.isHealthy());
         
-        // Test statistics
-        Map<String, Object> stats = vectorStoreService.getStatistics();
-        assertNotNull(stats);
-        assertTrue(stats.containsKey("total_embeddings"));
+
         
         // Test embedding deletion
         vectorStoreService.deleteEmbedding(embeddingId);

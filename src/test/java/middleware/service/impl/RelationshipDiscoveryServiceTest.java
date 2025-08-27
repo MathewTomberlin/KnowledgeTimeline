@@ -63,10 +63,10 @@ class RelationshipDiscoveryServiceTest {
         // Create mock similarity matches with valid UUID strings
         // These should not conflict with the test object IDs
         mockSimilarityMatches = Arrays.asList(
-            new VectorStoreService.SimilarityMatch("obj4-0000-0000-0000-000000000000", "var4", "text4", 0.85, new HashMap<>()),
-            new VectorStoreService.SimilarityMatch("obj5-0000-0000-0000-000000000000", "var5", "text5", 0.75, new HashMap<>()),
-            new VectorStoreService.SimilarityMatch("obj6-0000-0000-0000-000000000000", "var6", "text6", 0.65, new HashMap<>()),
-            new VectorStoreService.SimilarityMatch("obj7-0000-0000-0000-000000000000", "var7", "text7", 0.55, new HashMap<>())
+            new VectorStoreService.SimilarityMatch("obj4-0000-0000-0000-000000000000", "var4", 0.85, "text4", new HashMap<>()),
+            new VectorStoreService.SimilarityMatch("obj5-0000-0000-0000-000000000000", "var5", 0.75, "text5", new HashMap<>()),
+            new VectorStoreService.SimilarityMatch("obj6-0000-0000-0000-000000000000", "var6", 0.65, "text6", new HashMap<>()),
+            new VectorStoreService.SimilarityMatch("obj7-0000-0000-0000-000000000000", "var7", 0.55, "text7", new HashMap<>())
         );
     }
 
@@ -139,8 +139,8 @@ class RelationshipDiscoveryServiceTest {
 
         // Create similarity matches that include the same object
         List<VectorStoreService.SimilarityMatch> matchesWithSameObject = Arrays.asList(
-            new VectorStoreService.SimilarityMatch(objectId, "var1", "text1", 0.9, new HashMap<>()), // Same object
-            new VectorStoreService.SimilarityMatch("obj2-0000-0000-0000-000000000000", "var2", "text2", 0.8, new HashMap<>())
+            new VectorStoreService.SimilarityMatch(objectId, "var1", 0.9, "text1", new HashMap<>()), // Same object
+            new VectorStoreService.SimilarityMatch("obj2-0000-0000-0000-000000000000", "var2", 0.8, "text2", new HashMap<>())
         );
 
         when(knowledgeObjectRepository.findByIdAndTenantId(objectId, tenantId))
@@ -184,10 +184,10 @@ class RelationshipDiscoveryServiceTest {
         // Create similarity matches with different scores to test relationship type determination
         // These should not include the same object ID as the source object
         List<VectorStoreService.SimilarityMatch> diverseMatches = Arrays.asList(
-            new VectorStoreService.SimilarityMatch("obj5-0000-0000-0000-000000000000", "var5", "text5", 0.9, new HashMap<>()), // Should be SUPPORTS
-            new VectorStoreService.SimilarityMatch("obj6-0000-0000-0000-000000000000", "var6", "text6", 0.7, new HashMap<>()), // Should be REFERENCES
-            new VectorStoreService.SimilarityMatch("obj7-0000-0000-0000-000000000000", "var7", "text7", 0.5, new HashMap<>()), // Should be CONTRADICTS
-            new VectorStoreService.SimilarityMatch("obj8-0000-0000-0000-000000000000", "var8", "text8", 0.3, new HashMap<>())  // Should be REFERENCES (default)
+            new VectorStoreService.SimilarityMatch("obj5-0000-0000-0000-000000000000", "var5", 0.9, "text5", new HashMap<>()), // Should be SUPPORTS
+            new VectorStoreService.SimilarityMatch("obj6-0000-0000-0000-000000000000", "var6", 0.7, "text6", new HashMap<>()), // Should be REFERENCES
+            new VectorStoreService.SimilarityMatch("obj7-0000-0000-0000-000000000000", "var7", 0.5, "text7", new HashMap<>()), // Should be CONTRADICTS
+            new VectorStoreService.SimilarityMatch("obj8-0000-0000-0000-000000000000", "var8", 0.3, "text8", new HashMap<>())  // Should be REFERENCES (default)
         );
 
         when(knowledgeObjectRepository.findByIdAndTenantId(objectId, tenantId))
@@ -243,10 +243,10 @@ class RelationshipDiscoveryServiceTest {
         // Each object should get 4 similarity matches that don't include itself
         when(vectorStoreService.findSimilar(anyString(), anyInt(), anyMap(), anyBoolean(), anyDouble()))
             .thenReturn(Arrays.asList(
-                new VectorStoreService.SimilarityMatch("obj4-0000-0000-0000-000000000000", "var4", "text4", 0.85, new HashMap<>()),
-                new VectorStoreService.SimilarityMatch("obj5-0000-0000-0000-000000000000", "var5", "text5", 0.75, new HashMap<>()),
-                new VectorStoreService.SimilarityMatch("obj6-0000-0000-0000-000000000000", "var6", "text6", 0.65, new HashMap<>()),
-                new VectorStoreService.SimilarityMatch("obj7-0000-0000-0000-000000000000", "var7", "text7", 0.55, new HashMap<>())
+                new VectorStoreService.SimilarityMatch("obj4-0000-0000-0000-000000000000", "var4", 0.85, "text4", new HashMap<>()),
+                new VectorStoreService.SimilarityMatch("obj5-0000-0000-0000-000000000000", "var5", 0.75, "text5", new HashMap<>()),
+                new VectorStoreService.SimilarityMatch("obj6-0000-0000-0000-000000000000", "var6", 0.65, "text6", new HashMap<>()),
+                new VectorStoreService.SimilarityMatch("obj7-0000-0000-0000-000000000000", "var7", 0.55, "text7", new HashMap<>())
             ));
         when(relationshipRepository.save(any(KnowledgeRelationship.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
@@ -391,7 +391,7 @@ class RelationshipDiscoveryServiceTest {
         String objectId = testKnowledgeObject.getId().toString();
         String tenantId = "tenant1";
         VectorStoreService.SimilarityMatch match = new VectorStoreService.SimilarityMatch(
-            "obj2-0000-0000-0000-000000000000", "var2", "text2", 0.85, new HashMap<>()
+            "obj2-0000-0000-0000-000000000000", "var2", 0.85, "text2", new HashMap<>()
         );
 
         when(knowledgeObjectRepository.findByIdAndTenantId(objectId, tenantId))

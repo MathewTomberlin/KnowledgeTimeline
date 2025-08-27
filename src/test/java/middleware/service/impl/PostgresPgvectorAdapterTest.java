@@ -139,8 +139,8 @@ class PostgresPgvectorAdapterTest {
         double diversity = 0.3;
 
         List<VectorStoreService.SimilarityMatch> mockResults = Arrays.asList(
-            new VectorStoreService.SimilarityMatch("emb1", "var1", "text1", 0.8, new HashMap<>()),
-            new VectorStoreService.SimilarityMatch("emb2", "var2", "text2", 0.9, new HashMap<>())
+            new VectorStoreService.SimilarityMatch("emb1", "var1", 0.8, "text1", new HashMap<>()),
+            new VectorStoreService.SimilarityMatch("emb2", "var2", 0.9, "text2", new HashMap<>())
         );
 
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyString(), anyInt()))
@@ -260,53 +260,7 @@ class PostgresPgvectorAdapterTest {
         assertFalse(result);
     }
 
-    @Test
-    void testGetStatistics_WhenDatabaseIsHealthy() {
-        // Given
-        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM embeddings", Integer.class)).thenReturn(100);
 
-        // When
-        Map<String, Object> result = postgresPgvectorAdapter.getStatistics();
-
-        // Then
-        assertNotNull(result);
-        assertEquals(100, result.get("total_embeddings"));
-        assertEquals(384, result.get("embedding_dimension")); // default from application.yml
-        assertEquals("PostgreSQL with pgvector", result.get("database_type"));
-        
-        verify(jdbcTemplate).queryForObject("SELECT COUNT(*) FROM embeddings", Integer.class);
-    }
-
-    @Test
-    void testGetStatistics_WhenDatabaseThrowsException() {
-        // Given
-        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM embeddings", Integer.class))
-            .thenThrow(new RuntimeException("Database error"));
-
-        // When
-        Map<String, Object> result = postgresPgvectorAdapter.getStatistics();
-
-        // Then
-        assertNotNull(result);
-        assertTrue(result.containsKey("error"));
-        assertTrue(result.get("error").toString().contains("Failed to get statistics"));
-        assertEquals("PostgreSQL with pgvector", result.get("database_type"));
-    }
-
-    @Test
-    void testGetStatistics_WhenCountReturnsNull() {
-        // Given
-        when(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM embeddings", Integer.class)).thenReturn(null);
-
-        // When
-        Map<String, Object> result = postgresPgvectorAdapter.getStatistics();
-
-        // Then
-        assertNotNull(result);
-        assertEquals(0, result.get("total_embeddings"));
-        assertEquals(384, result.get("embedding_dimension"));
-        assertEquals("PostgreSQL with pgvector", result.get("database_type"));
-    }
 
     @Test
     void testConstructor_WithCustomEmbeddingDimension() {

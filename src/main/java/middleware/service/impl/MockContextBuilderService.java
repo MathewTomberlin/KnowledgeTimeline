@@ -5,6 +5,7 @@ import middleware.service.VectorStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import middleware.service.ContextBuilderService.KnowledgeObject;
 
 /**
  * Mock implementation of ContextBuilderService for testing and development.
@@ -45,7 +46,7 @@ public class MockContextBuilderService implements ContextBuilderService {
                 match.getObjectId(),
                 "SUMMARY", // Mock type
                 "Mock Knowledge Object",
-                match.getText(),
+                match.getContent(),
                 "SHORT", // Mock variant type
                 match.getSimilarityScore(),
                 match.getMetadata()

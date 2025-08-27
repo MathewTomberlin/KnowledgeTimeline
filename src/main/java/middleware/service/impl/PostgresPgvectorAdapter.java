@@ -77,9 +77,14 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
     }
 
     @Override
-    public void deleteEmbedding(String embeddingId) {
-        String sql = "DELETE FROM embeddings WHERE id = ?";
-        jdbcTemplate.update(sql, embeddingId);
+    public boolean deleteEmbedding(String embeddingId) {
+        try {
+            String sql = "DELETE FROM embeddings WHERE id = ?";
+            int rowsAffected = jdbcTemplate.update(sql, embeddingId);
+            return rowsAffected > 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -95,24 +100,8 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
     }
 
     @Override
-    public Map<String, Object> getStatistics() {
-        try {
-            String countSql = "SELECT COUNT(*) FROM embeddings";
-            String dimensionSql = "SELECT embedding_dimension FROM embeddings LIMIT 1";
-            
-            Integer totalEmbeddings = jdbcTemplate.queryForObject(countSql, Integer.class);
-            
-            return Map.of(
-                "total_embeddings", totalEmbeddings != null ? totalEmbeddings : 0,
-                "embedding_dimension", embeddingDimension,
-                "database_type", "PostgreSQL with pgvector"
-            );
-        } catch (Exception e) {
-            return Map.of(
-                "error", "Failed to get statistics: " + e.getMessage(),
-                "database_type", "PostgreSQL with pgvector"
-            );
-        }
+    public int getEmbeddingDimension() {
+        return embeddingDimension;
     }
 
     private List<Float> generateMockEmbedding(String text) {
@@ -129,7 +118,7 @@ public class PostgresPgvectorAdapter implements VectorStoreService {
             String text = rs.getString("text_snippet");
             double similarityScore = rs.getDouble("similarity_score");
             
-            return new SimilarityMatch(embeddingId, variantId, text, similarityScore, Map.of());
+            return new SimilarityMatch(embeddingId, variantId, similarityScore, text, Map.of());
         }
     }
 }
