@@ -88,7 +88,7 @@ public class OllamaAdapter implements LLMClientService {
         try {
             // Ollama doesn't have a separate embeddings API like OpenAI
             // We'll use the chat completion API to generate embeddings
-            String text = request.getInput().get(0); // Take first input
+            String text = request.getInput(); // Get the input string
 
             // For now, return a mock embedding since Ollama doesn't have native embedding support
             // In a real implementation, you might use a different model or service for embeddings
